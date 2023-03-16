@@ -82,6 +82,8 @@ void read_model(char *argv[]) {
     fprintf(stderr, "CKS BHAC\n");
 #elif (metric == MKSHARM)
     fprintf(stderr, "MKS HARM3D\n");
+#elif (metric == CSS)
+    fprintf(stderr, "CSSROT\n");
 #endif
 
     fprintf(stderr, "\nObserver parameters:\n\n");
