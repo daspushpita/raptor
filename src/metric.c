@@ -284,7 +284,7 @@ void metric_uu(double X_u[4], double g_uu[4][4]) {
 
     g_uu[0][0] = -1./tss;
     g_uu[0][1] = -y * omega/tss;
-    g_uu[0][2] = x * omega /tss
+    g_uu[0][2] = x * omega /tss;
     g_uu[1][0] = g_uu[0][1];
     g_uu[1][1] = y2/(x2 + y2) + x2 * term0 - (y2 * omega * omega)/tss;
     g_uu[1][2] = xy * (omega * omega/tss - term1);

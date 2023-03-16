@@ -612,6 +612,8 @@ void init_grmhd_data(char *fname) {
 
     if (metric == CKS)
         inputgrid = fopen("grid_cks.in", "r");
+    if (metric == CSS)
+        inputgrid = fopen("grid_css.in", "r");
     else
         inputgrid = fopen("grid_mks.in", "r");
 
@@ -639,6 +641,8 @@ void init_grmhd_data(char *fname) {
         fscanf(inputgrid, "%s %s %lf", temp, temp2, &xprobmax[2]);
 
     fscanf(inputgrid, "%s %s %lf", temp, temp2, &hslope);
+
+    fscanf(inputgrid, "%s %s %lf", temp, temp2, &omega);
 
     fclose(inputgrid);
 
