@@ -1,6 +1,6 @@
-CC = h5cc -I$(RAPTOR)/src -I$(PWD)
-CFLAGS = -fopenmp  -std=c99  -O2 -lm -lgsl -Wall -Wno-unused-but-set-variable
-LDFLAGS = -fopenmp -lm -lgsl 
+CC = h5cc -I$(RAPTOR)/src -I$(PWD) -I/home/pushpita/gsl/include -L/home/pushpita/gsl/lib
+CFLAGS = -fopenmp  -std=c99  -O2 -lgsl -lgslcblas -lm -Wall -Wno-unused-but-set-variable
+LDFLAGS = -fopenmp -lgsl -lgslcblas -lm 
 
 VPATH=$(RAPTOR)/src:
 CPATH=$(RAPTOR)/src:

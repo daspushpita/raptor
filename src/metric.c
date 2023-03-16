@@ -45,6 +45,33 @@ void metric_dd(double X_u[4], double g_dd[4][4]) {
     g_dd[0][3] = -2. * a * r * sint * sint / sigma;
     g_dd[3][0] = g_dd[0][3];
 
+#elif (metric == CSS) // Cartesian Schwarzschild metric
+
+    double x2 = X_u[1] * X_u[1];
+    double y2 = X_u[2] * X_u[2];
+    double z2 = X_u[3] * X_u[3];
+    double xy = X_u[1] * X_u[2];
+    double xz = X_u[1] * X_u[3];
+    double yz = X_u[2] * X_u[3];
+    double r = sqrt(x2 + y2 + z2);
+    double tss = 1. - 2./r;
+    double t1 = (1./tss + (z2/(x2 + y2)))/(r * r);
+
+    g_dd[0][0] = -tss + (x2 + y2) * omega * omega;
+    g_dd[0][1] = - X_u[2] * omega;
+    g_dd[0][2] = X_u[1] * omega;
+    g_dd[1][0] = - X_u[2] * omega;
+    g_dd[1][1] = t1 * x2 + y2/(x2 + y2);
+    g_dd[1][2] =  xy * (tss - 1./(x2 + y2));
+    g_dd[1][3] =  2. * xz / r * tss;
+    g_dd[2][0] = g_dd[0][2];
+    g_dd[2][1] = g_dd[1][2];
+    g_dd[2][2] = tss * y2 + x2/(x2 + y2);
+    g_dd[2][3] = 2. * yz/r * tss;
+    g_dd[3][1] = g_dd[1][3];
+    g_dd[3][2] = g_dd[2][3];
+    g_dd[3][3] = (1./(r * r)) * (x2 + y2 + (z2/tss));
+
 #elif (metric == KS || metric == MKS) // (Modified) Kerr-Schild metric
 
     double r = logscale ? exp(X_u[1]) + R0 : X_u[1];
@@ -239,6 +266,38 @@ void metric_uu(double X_u[4], double g_uu[4][4]) {
     g_uu[0][3] = -2. * a * r / (sigma * delta);
     g_uu[3][0] = g_uu[0][3];
 
+#elif (metric == CSS) // Cartesian schwarzschild coordinates
+
+    double x = X_u[1];
+    double y = X_u[2];
+    double z = X_u[3];
+    double x2 = X_u[1] * X_u[1];
+    double y2 = X_u[2] * X_u[2];
+    double z2 = X_u[3] * X_u[3];
+    double xy = X_u[1] * X_u[2];
+    double xz = X_u[1] * X_u[3];
+    double yz = X_u[2] * X_u[3];
+    double r = sqrt(x2 + y2 + z2);
+    double tss = 1. - 2./r;
+    double term0 = (1./r * r) * (tss + z2/(x2 + y2));
+    double term1 = 2. / (r * r * r);
+
+    g_uu[0][0] = -1./tss;
+    g_uu[0][1] = -y * omega/tss;
+    g_uu[0][2] = x * omega /tss
+    g_uu[1][0] = g_uu[0][1];
+    g_uu[1][1] = y2/(x2 + y2) + x2 * term0 - (y2 * omega * omega)/tss;
+    g_uu[1][2] = xy * (omega * omega/tss - term1);
+    g_uu[1][3] = -term1 * xz;
+    g_uu[2][0] = g_uu[0][2];
+    g_uu[2][1] = g_uu[1][2];
+    g_uu[2][2] = x2/(x2 + y2) + y2 * term0 - (x2 * omega * omega)/tss;
+    g_uu[2][3] = -term1 * yz;
+    g_uu[3][1] = g_uu[1][3];
+    g_uu[3][2] = g_uu[2][3];
+    g_uu[3][3] = 1. - term1 * z2; 
+
+
 #elif (metric == KS || metric == MKS) // (modified) Kerr-Schild metric
 
     double r = logscale ? exp(X_u[1]) + R0 : X_u[1];
@@ -327,7 +386,7 @@ void metric_uu(double X_u[4], double g_uu[4][4]) {
     double costh = cos(theta);
     double tfac, rfac, hfac, pfac;
 
-    tfac = 1.;
+    tfac = 1.; 
     rfac = (r - R0);
     hfac = 1;
     pfac = 1.;
@@ -1196,6 +1255,17 @@ void initialize_photon(double alpha, double beta, double photon_u[8],
 
 #endif
 
+#if (metric == CSS)
+
+    double CSSphoton_u[8];
+    BL_to_CSS_u(photon_u, CSSphoton_u);
+    LOOP_i {
+        photon_u[i] = CSSphoton_u[i];
+        photon_u[i + 4] = CSSphoton_u[i + 4];
+    }
+
+#endif
+
 #if (metric == MKSHARM || metric == MKSBHAC)
 
     photon_u[2] =
@@ -1209,6 +1279,7 @@ void initialize_photon(double alpha, double beta, double photon_u[8],
 #endif
 
 #if (metric == CKS)
+
     double photon_u_KS[8];
 
     LOOP_i {

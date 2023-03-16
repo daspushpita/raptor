@@ -15,6 +15,7 @@ extern double RHO_unit, U_unit, B_unit;
 extern double Ne_unit, Thetae_unit;
 
 extern double R0, a, Q, hslope;
+extern double omega;
 extern double stopx[4], startx[4], dx[4];
 
 extern double ***Xgrid;

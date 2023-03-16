@@ -23,6 +23,7 @@ double RHO_unit, U_unit, B_unit;
 double Ne_unit, Thetae_unit;
 
 double R0, a, Q, hslope;
+double omega;
 double *neqpar;
 
 double stopx[4], startx[4], dx[4];

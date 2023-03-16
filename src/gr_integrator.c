@@ -250,7 +250,7 @@ void verlet_step(double *y, void (*f)(double *, double *), double dl) {
 // velocity Ref. DOLENCE & MOSCIBRODZKA 2009
 double stepsize(double X_u[4], double U_u[4]) {
     double SMALL = 1.e-80;
-#if (metric == CKS)
+#if (metric == CKS || metric == CSS)
     double dlx1 = STEPSIZE / (fabs(U_u[1]) + SMALL * SMALL);
     double dlx2 = STEPSIZE / (fabs(U_u[2]) + SMALL * SMALL);
     double dlx3 = STEPSIZE / (fabs(U_u[3]) + SMALL * SMALL);
@@ -269,7 +269,7 @@ double stepsize(double X_u[4], double U_u[4]) {
     double idlx1 = 1. / (fabs(dlx1) + SMALL * SMALL);
     double idlx2 = 1. / (fabs(dlx2) + SMALL * SMALL);
     double idlx3 = 1. / (fabs(dlx3) + SMALL * SMALL);
-#if (metric == CKS)
+#if (metric == CKS || metric == CSS)
     double r = get_r(X_u);
     return -(r) / (idlx1 + idlx2 + idlx3);
 #else
@@ -355,7 +355,7 @@ void integrate_geodesic(double alpha, double beta, double *lightpath,
 
     // Trace light ray until it reaches the event horizon or the outer
     // cutoff, or steps > max_steps
-#if (metric == BL || metric == MBL)
+#if (metric == BL || metric == MBL || metric == CSS)
 
     // Stop condition for BL coords
     while (r_current > cutoff_inner && r_current < cutoff_outer &&

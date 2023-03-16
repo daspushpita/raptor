@@ -97,10 +97,11 @@ typedef struct Camera {
     (6) // BHAC style MKS coords          x1=log(r), x2=th/pi, and x3=phi
 #define MKSN (7) //  modified Kerr-Schild-Newman,  x1=log(r), x2=th, and x3=phi
 #define CKS (8)  //  modified Kerr-Schild-Newman,  x1=log(r), x2=th, and x3=phi
+#define CSS (9) //Cartesian Schwarzschild Coordinates
 
 // Metric
-#define metric (MKSBHAC)
-#if (metric == BL || metric == KS || metric == CKS)
+#define metric (CSS)   //Defining the cartesian metric here....
+#if (metric == BL || metric == KS || metric == CKS || metric == CSS)
 #define logscale (0) // Standard BL/KS coordinates; no logarithmic radius
 #elif (metric == MBL || metric == MKS || metric == MKSHARM ||                  \
        metric == MKSBHAC || metric == MKSN)

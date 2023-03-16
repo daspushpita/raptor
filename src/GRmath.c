@@ -28,6 +28,11 @@ double get_r(double X_u[4]) {
         (R2 - a2 + sqrt((R2 - a2) * (R2 - a2) + 4. * a2 * X_u[3] * X_u[3])) *
         0.5;
     return sqrt(r2);
+
+#elif (metric == CSS)
+
+    double r2 = X_u[1] * X_u[1] + X_u[2] * X_u[2] + X_u[3] * X_u[3];
+    return sqrt(r2);
 #else
     return logscale ? exp(X_u[1]) : X_u[1];
 #endif
@@ -370,6 +375,124 @@ void KS_to_CKS_u(double *KScoords, double *CKScoords) {
     }
 }
 
+// Adding transformations for BL to Cartesian Schwarzschild (CSS) and back ///
+
+void BL_to_CSS(double *X_BL_u, double *X_CSS_u) {
+
+    X_CSS_u[0] = X_BL_u[0];
+
+    double r = (X_BL_u[1]);
+    X_CSS_u[1] = r * cos(X_BL_u[3])* sin(X_BL_u[2]);
+    X_CSS_u[2] = r * sin(X_BL_u[3]) * sin(X_BL_u[2]);
+    X_CSS_u[3] = r * cos(X_BL_u[2]);
+}
+
+void CSS_to_BL(double *X_CSS_u, double *X_BL_u) {
+
+    double r = get_r(X_CSS_u);
+
+    X_BL_u[0] = X_CSS_u[0];
+    X_BL_u[1] = (r);
+    X_BL_u[2] = acos(X_CSS_u[3] / r);
+    X_BL_u[3] = atan2(r * X_CSS_u[2], X_CSS_u[1]);
+}
+
+void BL_to_CSS_u(double *BLphoton_u, double *CSSphoton_u) {
+    double trans[4][4];
+
+    LOOP_ij trans[i][j] = 0;
+    double X_BL_u[4], U_BL[4];
+    double X_CSS_u[4], U_CSS[4];
+    LOOP_i X_BL_u[i] = BLphoton_u[i];
+    LOOP_i U_BL[i] = BLphoton_u[i + 4];
+    LOOP_i U_CSS[i] = 0;
+
+    double r = (X_BL_u[1]);
+    double th = X_BL_u[2];
+    double phi = X_BL_u[3];
+
+    BL_to_CSS(X_BL_u, X_CSS_u);
+
+    double x = X_CSS_u[1];
+    double y = X_CSS_u[2];
+    double z = X_CSS_u[3];
+    double ter0 = sqrt(r * r - z * z);
+
+    trans[0][0] = 1;
+    trans[1][0] = y * omega;
+    trans[1][1] = x/r;
+    trans[1][2] = x * z/ter0;
+    trans[1][3] = -y;
+
+    trans[2][0] = -x * omega;
+    trans[2][1] = y/r;
+    trans[2][2] = y * z/ter0;
+    trans[2][3] = x;
+
+    trans[3][1] = z/r;
+    trans[3][2] = - sqrt(x * x + y * y);
+
+    for (int i = 0; i < 4; i++) {
+        for (int k = 0; k < 4; k++) {
+            U_CSS[i] += trans[k][i] * U_BL[k];
+        }
+    }
+
+    LOOP_i {
+        CSSphoton_u[i] = X_CSS_u[i];
+        CSSphoton_u[i + 4] = U_CSS[i];
+    }
+}
+
+// Transform a contravariant vector from KS to BL coordinates
+void CSS_to_BL_u(double *CSSphoton_u, double *BLphoton_u) {
+    double trans[4][4];
+
+    LOOP_ij trans[i][j] = 0;
+    double X_CSS_u[4], U_CSS[4];
+    double X_BL_u[4], U_BL[4];
+    LOOP_i X_CSS_u[i] = CSSphoton_u[i];
+    LOOP_i U_CSS[i] = CSSphoton_u[i + 4];
+    LOOP_i U_BL[i] = 0;
+
+    double x = X_CSS_u[1];
+    double y = X_CSS_u[2];
+    double z = X_CSS_u[3];
+
+    CSS_to_BL(X_CSS_u, X_BL_u);
+
+    double r = (X_BL_u[1]);
+    double th = X_BL_u[2];
+    double phi = X_BL_u[3];
+    double ter0 = sqrt(r * r - z * z);
+
+
+    trans[0][0] = 1;
+    trans[1][1] = x/r;
+    trans[1][2] = y/r;
+    trans[1][3] = z/r;
+
+    trans[2][1] = x * z/(r * r * ter0);
+    trans[2][2] = y * z/(r * r * ter0);
+    trans[2][3] = -ter0/(r * r);
+
+    trans[3][0] = omega;
+    trans[3][1] = -y/(ter0 * ter0);
+    trans[3][2] = x/(ter0 * ter0);
+
+    for (int i = 0; i < 4; i++) {
+        for (int k = 0; k < 4; k++) {
+            U_BL[i] += trans[k][i] * U_CSS[k];
+        }
+    }
+
+    LOOP_i {
+        BLphoton_u[i] = X_BL_u[i];
+        BLphoton_u[i + 4] = U_BL[i];
+    }
+}
+
+//////////////////////////////////////////////////////////////////
 // Compute the photon frequency in the plasma frame:
 double freq_in_plasma_frame(double Uplasma_u[4], double k_d[4]) {
     double nu_plasmaframe = 0.;
