@@ -47,31 +47,42 @@ void metric_dd(double X_u[4], double g_dd[4][4]) {
 
 #elif (metric == CSS) // Cartesian Schwarzschild metric
 
-    double x2 = X_u[1] * X_u[1];
-    double y2 = X_u[2] * X_u[2];
-    double z2 = X_u[3] * X_u[3];
-    double xy = X_u[1] * X_u[2];
-    double xz = X_u[1] * X_u[3];
-    double yz = X_u[2] * X_u[3];
+    double x = X_u[1];
+    double y = X_u[2];
+    double z = X_u[3];
+
+    double x2 = x * x;
+    double y2 = y * y;
+    double z2 = z * z;
+    double xy = x * y;
+    double xz = x * z;
+    double yz = y * z;
     double r = sqrt(x2 + y2 + z2);
     double tss = 1. - 2./r;
-    double t1 = (1./tss + (z2/(x2 + y2)))/(r * r);
+    double small = 1.2E-30; // Hack: Adding a small number to avoid division by zero
+    double term1 = (1./(r * r)) * (1./tss + z2/(x2 + y2 + small));
 
+if (r > 2.5){
     g_dd[0][0] = -tss + (x2 + y2) * omega * omega;
-    g_dd[0][1] = - X_u[2] * omega;
-    g_dd[0][2] = X_u[1] * omega;
-    g_dd[1][0] = - X_u[2] * omega;
-    g_dd[1][1] = t1 * x2 + y2/(x2 + y2);
-    g_dd[1][2] =  xy * (tss - 1./(x2 + y2));
-    g_dd[1][3] =  2. * xz / r * tss;
+    g_dd[0][1] = - y * omega;
+    g_dd[0][2] = x * omega;
+    g_dd[1][0] = g_dd[0][1];
+    g_dd[1][1] = term1 * x2 + y2 / (x2 + y2 + small);
+    g_dd[1][2] =  xy * (term1 - 1. / (x2 + y2 + small));
+    g_dd[1][3] =  2. * xz / (r * r * (r - 2.));
     g_dd[2][0] = g_dd[0][2];
     g_dd[2][1] = g_dd[1][2];
-    g_dd[2][2] = tss * y2 + x2/(x2 + y2);
-    g_dd[2][3] = 2. * yz/r * tss;
+    g_dd[2][2] = term1 * y2 + x2 / (x2 + y2 + small);
+    g_dd[2][3] = 2. * yz / (r * r * (r - 2.));
     g_dd[3][1] = g_dd[1][3];
     g_dd[3][2] = g_dd[2][3];
-    g_dd[3][3] = (1./(r * r)) * (x2 + y2 + (z2/tss));
-
+    g_dd[3][3] = (1. / (r * r)) * (x2 + y2 + (z2 / tss));
+}
+else{  // Going back to flat spacetime beyond r = 2.5 
+    g_dd[0][0] = -1.;
+    for (int i = 1; i < DIM; i++)
+        g_dd[i][i] = 1.;
+}
 #elif (metric == KS || metric == MKS) // (Modified) Kerr-Schild metric
 
     double r = logscale ? exp(X_u[1]) + R0 : X_u[1];
@@ -271,32 +282,40 @@ void metric_uu(double X_u[4], double g_uu[4][4]) {
     double x = X_u[1];
     double y = X_u[2];
     double z = X_u[3];
-    double x2 = X_u[1] * X_u[1];
-    double y2 = X_u[2] * X_u[2];
-    double z2 = X_u[3] * X_u[3];
-    double xy = X_u[1] * X_u[2];
-    double xz = X_u[1] * X_u[3];
-    double yz = X_u[2] * X_u[3];
+
+    double x2 = x * x;
+    double y2 = y * y;
+    double z2 = z * z;
+    double xy = x * y;
+    double xz = x * z;
+    double yz = y * z;
     double r = sqrt(x2 + y2 + z2);
     double tss = 1. - 2./r;
-    double term0 = (1./r * r) * (tss + z2/(x2 + y2));
+    double small = 1.2E-30; // Hack: Adding a small number to avoid division by zero
+    double term0 = (1./r * r) * (tss + z2/(x2 + y2 + small));
     double term1 = 2. / (r * r * r);
 
+if (r > 2.5){
     g_uu[0][0] = -1./tss;
     g_uu[0][1] = -y * omega/tss;
     g_uu[0][2] = x * omega /tss;
     g_uu[1][0] = g_uu[0][1];
-    g_uu[1][1] = y2/(x2 + y2) + x2 * term0 - (y2 * omega * omega)/tss;
+    g_uu[1][1] = y2/(x2 + y2 + small) + x2 * term0 - (y2 * omega * omega)/tss;
     g_uu[1][2] = xy * (omega * omega/tss - term1);
     g_uu[1][3] = -term1 * xz;
     g_uu[2][0] = g_uu[0][2];
     g_uu[2][1] = g_uu[1][2];
-    g_uu[2][2] = x2/(x2 + y2) + y2 * term0 - (x2 * omega * omega)/tss;
+    g_uu[2][2] = x2/(x2 + y2 + small) + y2 * term0 - (x2 * omega * omega)/tss;
     g_uu[2][3] = -term1 * yz;
     g_uu[3][1] = g_uu[1][3];
     g_uu[3][2] = g_uu[2][3];
     g_uu[3][3] = 1. - term1 * z2; 
-
+}
+else{  // Going back to flat spacetime beyond r = 2.5 
+    g_uu[0][0] = -1.;
+    for (int i = 1; i < DIM; i++)
+        g_uu[i][i] = 1.;
+}
 
 #elif (metric == KS || metric == MKS) // (modified) Kerr-Schild metric
 

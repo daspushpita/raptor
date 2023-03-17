@@ -201,12 +201,21 @@ double get_detgamma(double x, double y, double z) {
     if (isnan(sqrt(detgamma))) {
         double R2 = x * x + y * y + z * z;
         double a2 = a * a;
-        double r2 =
-            (R2 - a2 + sqrt((R2 - a2) * (R2 - a2) + 4. * a2 * z * z)) * 0.5;
+        double r = sqrt(R2);
+        double r2 = (R2 - a2 + sqrt((R2 - a2) * (R2 - a2) + 4. * a2 * z * z)) * 0.5;
         double r_current = sqrt(r2);
 
-        fprintf(stderr, "isnan detgam %e %e rc %e\n", sqrt(detgamma), detgamma,
-                r_current);
+        fprintf(stderr, "isnan detgam %e %e rc %e x %e y %e z %e\n", sqrt(detgamma), detgamma,
+                r_current, x, y, z);
+        fprintf(stderr, "gdd11 %e\n", g_dd[1][1]);
+        fprintf(stderr, "gdd12 %e\n", g_dd[1][2]);
+        fprintf(stderr, "gdd13 %e\n", g_dd[1][3]);
+        fprintf(stderr, "gdd21 %e\n", g_dd[2][1]);
+        fprintf(stderr, "gdd22 %e\n", g_dd[2][2]);
+        fprintf(stderr, "gdd23 %e\n", g_dd[2][3]);
+        fprintf(stderr, "gdd31 %e\n", g_dd[3][1]);
+        fprintf(stderr, "gdd32 %e\n", g_dd[3][2]);
+        fprintf(stderr, "gdd33 %e\n", g_dd[3][3]);
         detgamma = 0;
         exit(1);
     }
@@ -612,9 +621,9 @@ void init_grmhd_data(char *fname) {
 
     if (metric == CKS)
         inputgrid = fopen("grid_cks.in", "r");
-    if (metric == CSS)
+    else if (metric == CSS)
         inputgrid = fopen("grid_css.in", "r");
-    else
+    else 
         inputgrid = fopen("grid_mks.in", "r");
 
     if (inputgrid == NULL) {
@@ -639,11 +648,10 @@ void init_grmhd_data(char *fname) {
     fscanf(inputgrid, "%s %s %lf", temp, temp2, &xprobmax[1]);
     if (ndimini == 3)
         fscanf(inputgrid, "%s %s %lf", temp, temp2, &xprobmax[2]);
+    if (metric == CSS)
+        fscanf(inputgrid, "%s %s %lf", temp, temp2, &omega);
 
     fscanf(inputgrid, "%s %s %lf", temp, temp2, &hslope);
-
-    fscanf(inputgrid, "%s %s %lf", temp, temp2, &omega);
-
     fclose(inputgrid);
 
     if (metric == MKSBHAC || metric == MKSN) {
