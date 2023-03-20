@@ -23,7 +23,7 @@ double RHO_unit, U_unit, B_unit;
 double Ne_unit, Thetae_unit;
 
 double R0, a, Q, hslope;
-double omega;
+double omega, rstar;
 double *neqpar;
 
 double stopx[4], startx[4], dx[4];
@@ -650,6 +650,7 @@ void init_grmhd_data(char *fname) {
         fscanf(inputgrid, "%s %s %lf", temp, temp2, &xprobmax[2]);
     if (metric == CSS)
         fscanf(inputgrid, "%s %s %lf", temp, temp2, &omega);
+        fscanf(inputgrid, "%s %s %lf", temp, temp2, &rstar);
 
     fscanf(inputgrid, "%s %s %lf", temp, temp2, &hslope);
     fclose(inputgrid);

@@ -360,7 +360,6 @@ void integrate_geodesic(double alpha, double beta, double *lightpath,
     // Stop condition for BL coords
     while (r_current > cutoff_inner && r_current < cutoff_outer &&
            *steps < max_steps && !TERMINATE) { // && photon_u[0] < t_final){
-
 #else
 
     // Stop condition for KS coords

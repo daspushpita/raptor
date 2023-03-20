@@ -11,3 +11,4 @@ xprobmax2 = 400.
 xprobmax3 = 400.
 
 omega = 0.03
+rstar = 4.0

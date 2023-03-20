@@ -26,7 +26,12 @@ double JANSKY_FACTOR; // Factor to scale image output
 void set_constants() {
     // Horizon radius for integration cutoff
     double Rh = (1. + sqrt(1. - a * a));
-    CUTOFF_INNER = Rh * (1. + horizon_marg); // Cutoff outside or inside BH EH
+    #if (metric == CSS)
+        CUTOFF_INNER = rstar; // Terminate at the neutron star surface for PPM
+    #else 
+        CUTOFF_INNER = Rh * (1. + horizon_marg); // Cutoff outside or inside BH EH 
+    #endif 
+    
     R_GRAV = GGRAV * MBH / SPEED_OF_LIGHT / SPEED_OF_LIGHT; // Rg in cm
     C_CONST = R_GRAV * PLANCK_CONSTANT /
               (ELECTRON_MASS * SPEED_OF_LIGHT * SPEED_OF_LIGHT);

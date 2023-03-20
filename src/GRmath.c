@@ -416,7 +416,8 @@ void BL_to_CSS_u(double *BLphoton_u, double *CSSphoton_u) {
     double x = X_CSS_u[1];
     double y = X_CSS_u[2];
     double z = X_CSS_u[3];
-    double ter0 = sqrt(r * r - z * z);
+    double small  = 1.2E-30;
+    double ter0 = sqrt(r * r - z * z) + small;
 
     trans[0][0] = 1;
     trans[1][0] = y * omega;
@@ -464,7 +465,8 @@ void CSS_to_BL_u(double *CSSphoton_u, double *BLphoton_u) {
     double r = (X_BL_u[1]);
     double th = X_BL_u[2];
     double phi = X_BL_u[3];
-    double ter0 = sqrt(r * r - z * z);
+    double small  = 1.2E-30;
+    double ter0 = sqrt(r * r - z * z) + small;
 
 
     trans[0][0] = 1;
