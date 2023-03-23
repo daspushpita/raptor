@@ -34,6 +34,7 @@
 #define SPECFILE (1)
 #define RAD_TRANS (1)
 #define POL (1)
+#define RAYOUT (1)
 
 #define num_frequencies 1
 
@@ -120,7 +121,7 @@ typedef struct Camera {
 
 // OBSERVER PARAMETERS
 //////////////////////
-#define rcam (1e4) //(500.)    // Camera distance from the sing.(units of Rg)
+#define rcam (300) //(500.)    // Camera distance from the sing.(units of Rg)
 
 #define max_order (100) // Maximimum order of lensed images 0 = direct only
 

@@ -224,6 +224,41 @@ double get_detgamma(double x, double y, double z) {
     return sqrt(detgamma);
 }
 
+void g_uu_times_gdd(double X_u[4], double I_isit[4][4]) {
+
+    double g_dd[4][4];
+    double g_uu[4][4];
+
+    metric_dd(X_u, g_dd);
+    metric_uu(X_u, g_uu);
+    LOOP_ij I_isit[i][j] = 0.;
+
+    for (int i = 0; i < 4; i++) {
+        for (int j = 0; j < 4; j++) {
+            for (int k = 0; k < 4; k++) {
+                I_isit[i][j] += g_uu[i][k]*g_dd[k][j];
+            }
+        }
+    }
+        fprintf(stderr, "I_isit00 %e\n", I_isit[0][0]);
+        fprintf(stderr, "I_isit01 %e\n", I_isit[0][1]);
+        fprintf(stderr, "I_isit02 %e\n", I_isit[0][2]);
+        fprintf(stderr, "I_isit03 %e\n", I_isit[0][3]);
+        fprintf(stderr, "I_isit04 %e\n", I_isit[0][4]);
+        fprintf(stderr, "I_isit10 %e\n", I_isit[1][0]);
+        fprintf(stderr, "I_isit11 %e\n", I_isit[1][1]);
+        fprintf(stderr, "I_isit12 %e\n", I_isit[1][2]);
+        fprintf(stderr, "I_isit13 %e\n", I_isit[1][3]);
+        fprintf(stderr, "I_isit20 %e\n", I_isit[2][0]);
+        fprintf(stderr, "I_isit21 %e\n", I_isit[2][1]);
+        fprintf(stderr, "I_isit22 %e\n", I_isit[2][2]);
+        fprintf(stderr, "I_isit23 %e\n", I_isit[2][3]);
+        fprintf(stderr, "I_isit30 %e\n", I_isit[3][0]);
+        fprintf(stderr, "I_isit31 %e\n", I_isit[3][1]);
+        fprintf(stderr, "I_isit32 %e\n", I_isit[3][2]);
+        fprintf(stderr, "I_isit33 %e\n", I_isit[3][3]);
+}
+
 void calc_coord_bar(double *X, double *dxc_block, double *Xbar) {
     double coef_1D[3];
     double coef_2D[3][3];

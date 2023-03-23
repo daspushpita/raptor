@@ -312,6 +312,37 @@ void write_VTK_image(FILE *fp, double *intensityfield, double *lambdafield,
         }
     fprintf(stdout, "Integrated flux density = %.5e\n", flux);
 }
+//First checking the unpolarized version and plotting geodesics////
+void write_ray_output(double X_u[4], double k_u[4], int block, int pixel) {
+
+    char fname[20];
+    FILE *rayfile;
+    char ray_folder[64] = "output-ray";
+    struct stat st = {0};
+    double r_current = get_r(X_u);
+
+    if (stat(ray_folder, &st) == -1) {
+        mkdir(ray_folder, 0700);
+    }
+
+    sprintf(fname, "%s/data_ray_%d_%d.csv", ray_folder, block, pixel);
+
+    if (stat(fname, &st) == -1) {
+        rayfile = fopen(fname, "w");
+
+        fprintf(rayfile, "x_0 x_1 x_2 x_3 radius ");
+        fprintf(rayfile, "k_0 k_1 k_2 k_3\n");
+
+        fclose(rayfile);
+    }
+
+    rayfile = fopen(fname, "a");
+
+    fprintf(rayfile, "%e %e %e %e %e ", X_u[0], X_u[1], X_u[2], X_u[3], r_current);
+    fprintf(rayfile, "%e %e %e %e\n", k_u[0], k_u[1], k_u[2], k_u[3]);
+
+    fclose(rayfile);
+}
 
 // Outputs the ACG camera struct with a uniform resolution
 void write_uniform_camera(struct Camera *intensityfield, double frequency,

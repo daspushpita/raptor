@@ -395,8 +395,10 @@ void CSS_to_BL(double *X_CSS_u, double *X_BL_u) {
     X_BL_u[1] = (r);
     X_BL_u[2] = acos(X_CSS_u[3] / r);
     X_BL_u[3] = atan2(r * X_CSS_u[2], X_CSS_u[1]);
+    
 }
 
+// Transform a contravariant vector from BL to CSS coordinates
 void BL_to_CSS_u(double *BLphoton_u, double *CSSphoton_u) {
     double trans[4][4];
 
@@ -417,7 +419,7 @@ void BL_to_CSS_u(double *BLphoton_u, double *CSSphoton_u) {
     double y = X_CSS_u[2];
     double z = X_CSS_u[3];
     double small  = 1.2E-30;
-    double ter0 = sqrt(r * r - z * z) + small;
+    double ter0 = sqrt(x * x + y * y) + small;
 
     trans[0][0] = 1;
     trans[1][0] = y * omega;
@@ -434,8 +436,8 @@ void BL_to_CSS_u(double *BLphoton_u, double *CSSphoton_u) {
     trans[3][2] = - sqrt(x * x + y * y);
 
     for (int i = 0; i < 4; i++) {
-        for (int k = 0; k < 4; k++) {
-            U_CSS[i] += trans[k][i] * U_BL[k];
+        for (int j = 0; j < 4; j++) {
+            U_CSS[i] += trans[i][j] * U_BL[j];
         }
     }
 
@@ -445,7 +447,7 @@ void BL_to_CSS_u(double *BLphoton_u, double *CSSphoton_u) {
     }
 }
 
-// Transform a contravariant vector from KS to BL coordinates
+// Transform a contravariant vector from CSS to BL coordinates
 void CSS_to_BL_u(double *CSSphoton_u, double *BLphoton_u) {
     double trans[4][4];
 
@@ -483,8 +485,8 @@ void CSS_to_BL_u(double *CSSphoton_u, double *BLphoton_u) {
     trans[3][2] = x/(ter0 * ter0);
 
     for (int i = 0; i < 4; i++) {
-        for (int k = 0; k < 4; k++) {
-            U_BL[i] += trans[k][i] * U_CSS[k];
+        for (int j = 0; j < 4; j++) {
+            U_BL[i] += trans[i][j] * U_CSS[j];
         }
     }
 

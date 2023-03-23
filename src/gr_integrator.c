@@ -332,7 +332,8 @@ void f_geodesic(double *y, double *fvector) {
 
 // Integrate the null geodesic defined by "photon_u"
 void integrate_geodesic(double alpha, double beta, double *lightpath,
-                        int *steps, double cutoff_inner) {
+                        int *steps, double cutoff_inner,
+                        int block, int pixel) {
     int q;
     double t_init = 0.;
     double dlambda_adaptive = -0.1;
@@ -377,6 +378,9 @@ void integrate_geodesic(double alpha, double beta, double *lightpath,
             photon_u[i+4] = k_u[i];
         }
 
+        #if (RAYOUT)
+            write_ray_output(X_u, k_u, block, pixel);
+        #endif
         // Enter current position/velocity/dlambda into lightpath
         for (q = 0; q < 8; q++)
             lightpath[*steps * 9 + q] = photon_u[q];

@@ -59,7 +59,7 @@ void metric_dd(double X_u[4], double g_dd[4][4]) {
     double yz = y * z;
     double r = sqrt(x2 + y2 + z2);
     double tss = 1. - 2./r;
-    double small = 1.2E-30; // Hack: Adding a small number to avoid division by zero
+    double small = 1.2E-40; // Hack: Adding a small number to avoid division by zero
     double term1 = (1./(r * r)) * (1./tss + z2/(x2 + y2 + small));
 
 if (r > 2.5){
@@ -291,8 +291,8 @@ void metric_uu(double X_u[4], double g_uu[4][4]) {
     double yz = y * z;
     double r = sqrt(x2 + y2 + z2);
     double tss = 1. - 2./r;
-    double small = 1.2E-30; // Hack: Adding a small number to avoid division by zero
-    double term0 = (1./r * r) * (tss + z2/(x2 + y2 + small));
+    double small = 1.2E-40; // Hack: Adding a small number to avoid division by zero
+    double term0 = (1./(r * r)) * (tss + z2/(x2 + y2 + small));
     double term1 = 2. / (r * r * r);
 
 if (r > 2.5){
@@ -301,7 +301,7 @@ if (r > 2.5){
     g_uu[0][2] = x * omega /tss;
     g_uu[1][0] = g_uu[0][1];
     g_uu[1][1] = y2/(x2 + y2 + small) + x2 * term0 - (y2 * omega * omega)/tss;
-    g_uu[1][2] = xy * (omega * omega/tss - term1);
+    g_uu[1][2] = xy * ((omega * omega)/tss - term1);
     g_uu[1][3] = -term1 * xz;
     g_uu[2][0] = g_uu[0][2];
     g_uu[2][1] = g_uu[1][2];
@@ -536,7 +536,7 @@ void connection_num_udd(double X_u[4], double gamma_udd[4][4][4]) {
             X_u_temp[j] = X_u[j];
         }
 
-#if (metric == CKS)
+#if (metric == CKS || metric == CSS)
         double r = get_r(X_u);
         double fac;
         if (fabs(X_u[i]) > delta_num * 1e-2)
@@ -1260,7 +1260,6 @@ void initialize_photon(double alpha, double beta, double photon_u[8],
     photon_u[5] = k_u[1];
     photon_u[6] = k_u[2];
     photon_u[7] = k_u[3];
-
 // Convert k_u to the coordinate system that is currently used
 #if (metric == KS || metric == MKS || metric == MKSHARM || metric == MKSN ||   \
      metric == CKS || metric == MKSBHAC)
@@ -1272,9 +1271,7 @@ void initialize_photon(double alpha, double beta, double photon_u[8],
         photon_u[i + 4] = KSphoton_u[i + 4];
     }
 
-#endif
-
-#if (metric == CSS)
+#else if (metric == CSS)
 
     double CSSphoton_u[8];
     BL_to_CSS_u(photon_u, CSSphoton_u);
@@ -1282,7 +1279,6 @@ void initialize_photon(double alpha, double beta, double photon_u[8],
         photon_u[i] = CSSphoton_u[i];
         photon_u[i + 4] = CSSphoton_u[i + 4];
     }
-
 #endif
 
 #if (metric == MKSHARM || metric == MKSBHAC)

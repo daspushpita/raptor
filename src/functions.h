@@ -113,7 +113,8 @@ void f_geodesic(double *y, double *fvector);
 // Integrate the null geodesic specified by alpha and beta, store results
 // in lightpath
 void integrate_geodesic(double alpha, double beta, double *lightpath,
-                        int *steps, double cutoff_inner);
+                        int *steps, double cutoff_inner,
+                        int block, int pixel);
 
 void radiative_transfer_polarized(double *lightpath, int steps,
                                   double frequency, double *f_x, double *f_y,
@@ -342,10 +343,12 @@ void write_image_hdf5(char *hdf5_filename, struct Camera *data,
 
 void write_uniform_camera(struct Camera *intensityfield, double frequency,
                           int freq);
+
+void write_ray_output(double X_u[], double k_u[], int block, int pixel);
 // Integrate null geodesics, perform radiative transfer calculations, and
 // compute the image.
 void calculate_image_block(struct Camera *intensityfield,
-                           double frequencies[num_frequencies]);
+                           double frequencies[num_frequencies], int block);
 /// CAMERA.C
 void init_camera(struct Camera **intensityfield);
 
