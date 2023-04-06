@@ -34,7 +34,7 @@ def read_data(folder,ind,data_id):
     min = [-100.,-100.,-100.,-100.]
     max = [100.,100.,100,100.]
     print(len(data_id))
-    for j in range(0,len(data_id)-4):
+    for j in range(0,len(data_id)-2):
         for i in range(0,len(images[data_id[j]])):
             current=np.max(images[data_id[j]][i])
             max[j]=np.maximum(max[j],np.max(images[data_id[j]][i]))

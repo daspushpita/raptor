@@ -1111,6 +1111,12 @@ int get_fluid_params(double X[NDIM], struct GRMHD *modvar) {
     rho = interp_scalar(p[KRHO][igrid], c, del);
     uu = interp_scalar(p[UU][igrid], c, del);
 
+
+    (*modvar).gamma_rel = 5./3.;
+    (*modvar).pp = uu * ((*modvar).gamma_rel - 1.);
+    (*modvar).rho = rho;
+
+
     (*modvar).n_e = rho * Ne_unit + smalll;
 
     Bp[1] = interp_scalar(p[B1][igrid], c, del);
@@ -1181,6 +1187,9 @@ int get_fluid_params(double X[NDIM], struct GRMHD *modvar) {
                       (*modvar).B_u[3] * (*modvar).B_d[3]) +
                  smalll;
     (*modvar).B = sqrt(Bsq) * B_unit;
+    double rwrite = sqrt(Xgrid[igrid][c][1] * Xgrid[igrid][c][1] +
+                    Xgrid[igrid][c][2] * Xgrid[igrid][c][2] +
+                    Xgrid[igrid][c][3] * Xgrid[igrid][c][3]);
 
 #if (DEBUG)
     if (isnan(Bsq) || isnan((*modvar).B)) {
@@ -1242,6 +1251,189 @@ int get_fluid_params(double X[NDIM], struct GRMHD *modvar) {
     return 1;
 }
 
+int get_fluid_params_star(double X[NDIM], struct GRMHD *modvar) {
+    double g_dd[NDIM][NDIM];
+    double g_uu[NDIM][NDIM];
+    int igrid = (*modvar).igrid_c;
+    int i, c;
+    double del[NDIM];
+    double rho, uu;
+    double Bp[NDIM], V_u[NDIM];
+    double gV_u[NDIM], gVdotgV;
+
+#if (metric == MKSBHAC || metric == MKSN)
+    X[3] = fmod(X[3], 2 * M_PI);
+    X[2] = fmod(X[2], M_PI) - 1e-6;
+    if (X[3] < 0.)
+        X[3] = 2. * M_PI + X[3];
+    if (X[2] < 0.) {
+        X[2] = -X[2];
+        X[3] = M_PI + X[3];
+    }
+#endif
+
+    double r = get_r(X);
+
+    if (r < 1.00)
+        return 0;
+
+    double smalll = 1.e-6;
+    double small = 0;
+
+    if (X[1] > stopx[1] || X[1] < startx[1] || X[2] < startx[2] ||
+        X[2] > stopx[2] || X[3] < startx[3] || X[3] > stopx[3]) {
+        return 0;
+    }
+
+    if (igrid == -1 || X[1] + small < block_info[igrid].lb[0] ||
+        X[1] + small >
+            block_info[igrid].lb[0] +
+                (block_info[igrid].size[0]) * block_info[igrid].dxc_block[0] ||
+        X[2] + small < block_info[igrid].lb[1] ||
+        X[2] + small >
+            block_info[igrid].lb[1] +
+                (block_info[igrid].size[1]) * block_info[igrid].dxc_block[1] ||
+        X[3] + small < block_info[igrid].lb[2] ||
+        X[3] + small >
+            block_info[igrid].lb[2] +
+                (block_info[igrid].size[2]) * block_info[igrid].dxc_block[2]) {
+        (*modvar).igrid_c = find_igrid(X, block_info, Xgrid);
+        igrid = (*modvar).igrid_c;
+    }
+
+    if (igrid == -1) {
+        fprintf(stderr,
+                "issues with finding igrid, too close to barrier, skipping... "
+                "%e %e %e\n",
+                X[1], X[2], X[3]);
+        return 0;
+    }
+
+    (*modvar).dx_local = block_info[igrid].dxc_block[0];
+
+    c = find_cell(X, block_info, igrid, Xgrid);
+
+    metric_uu(X, g_uu);
+
+    metric_dd(X, g_dd);
+
+    coefficients(X, block_info, igrid, c, del);
+
+    rho = interp_scalar(p[KRHO][igrid], c, del);
+    uu = interp_scalar(p[UU][igrid], c, del);
+
+
+    (*modvar).gamma_rel = 5./3.;
+    (*modvar).pp = uu * ((*modvar).gamma_rel - 1.);
+    (*modvar).rho = rho;
+
+
+    (*modvar).n_e = rho * Ne_unit + smalll;
+
+    Bp[1] = interp_scalar(p[B1][igrid], c, del);
+    Bp[2] = interp_scalar(p[B2][igrid], c, del);
+    Bp[3] = interp_scalar(p[B3][igrid], c, del);
+
+    gV_u[1] = interp_scalar(p[U1][igrid], c, del);
+    gV_u[2] = interp_scalar(p[U2][igrid], c, del);
+    gV_u[3] = interp_scalar(p[U3][igrid], c, del);
+
+    double gamma_dd[4][4];
+    for (int i = 1; i < 4; i++) {
+        for (int j = 1; j < 4; j++) {
+            gamma_dd[i][j] = g_dd[i][j];
+        }
+    }
+    double shift[4];
+    for (int j = 1; j < 4; j++) {
+        shift[j] = g_uu[0][j] / (-g_uu[0][0]);
+    }
+    double alpha = 1 / sqrt(-g_uu[0][0]);
+    gVdotgV = 0.;
+    (*modvar).U_u[0] = 0.;
+    for (int i = 1; i < NDIM; i++) {
+        for (int j = 1; j < NDIM; j++) {
+            gVdotgV += gamma_dd[i][j] * gV_u[i] * gV_u[j];
+        }
+    }
+
+    double lfac = sqrt(gVdotgV + 1.);
+
+    V_u[1] = gV_u[1] / lfac;
+    V_u[2] = gV_u[2] / lfac;
+    V_u[3] = gV_u[3] / lfac;
+
+    (*modvar).U_u[0] = lfac / alpha;
+
+    for (int i = 1; i < NDIM; i++) {
+        (*modvar).U_u[i] = 0;
+        (*modvar).U_u[i] = V_u[i] * lfac - shift[i] * lfac / alpha;
+    }
+
+    lower_index(X, (*modvar).U_u, (*modvar).U_d);
+
+    //    double UdotU = four_velocity_norm(X,(*modvar).U_u);
+    //   LOOP_i (*modvar).U_u[i]/=sqrt(fabs(UdotU));
+
+    (*modvar).B_u[0] = 0;
+    for (i = 1; i < NDIM; i++) {
+        for (int l = 1; l < NDIM; l++) {
+            (*modvar).B_u[0] +=
+                lfac * Bp[i] * (gamma_dd[i][l] * V_u[l]) / alpha;
+        }
+    }
+
+    for (int i = 1; i < NDIM; i++) {
+        (*modvar).B_u[i] = 0;
+        (*modvar).B_u[i] =
+            (Bp[i] + alpha * (*modvar).B_u[0] * (*modvar).U_u[i]) / lfac;
+    }
+
+    lower_index(X, (*modvar).B_u, (*modvar).B_d);
+
+    // magnetic field
+    double Bsq = fabs((*modvar).B_u[0] * (*modvar).B_d[0] +
+                      (*modvar).B_u[1] * (*modvar).B_d[1] +
+                      (*modvar).B_u[2] * (*modvar).B_d[2] +
+                      (*modvar).B_u[3] * (*modvar).B_d[3]) +
+                 smalll;
+    (*modvar).B = sqrt(Bsq) * B_unit;
+    double rwrite = sqrt(Xgrid[igrid][c][1] * Xgrid[igrid][c][1] +
+                    Xgrid[igrid][c][2] * Xgrid[igrid][c][2] +
+                    Xgrid[igrid][c][3] * Xgrid[igrid][c][3]);
+
+    double gam = neqpar[0];
+
+    double beta_trans = 1.0;
+
+    (*modvar).beta = uu * (gam - 1.) / (0.5 * (Bsq + smalll));
+
+    double b2 = pow(((*modvar).beta / beta_trans), 2.);
+
+    (*modvar).sigma = Bsq / (rho + smalll);
+
+    (*modvar).sigma_min = 1.0;
+    double Rhigh = R_HIGH;
+    double Rlow = R_LOW;
+
+    double trat = Rhigh * b2 / (1. + b2) + Rlow / (1. + b2);
+
+    Thetae_unit = 1. / 3. * (MPoME) / (trat + 1);
+
+    (*modvar).theta_e = (uu / rho) * Thetae_unit;
+    double xc = r * sin(X[2]) * cos(X[3]);
+    double yc = r * sin(X[2]) * sin(X[3]);
+    double rc = sqrt(xc * xc + yc * yc);
+
+    if (r > RT_OUTER_CUTOFF){ //||
+        //(*modvar).theta_e > THETAE_MAX ||
+        //(*modvar).theta_e < THETAE_MIN) { // excludes all spine emmission
+        (*modvar).n_e = 0;
+        return 0;
+    }
+
+    return 1;
+}
 void compute_spec_user(struct Camera *intensityfield,
                        double energy_spectrum[num_frequencies][nspec]) {
 /*

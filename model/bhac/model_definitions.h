@@ -49,6 +49,9 @@ typedef struct GRMHD {
     double dx_local;
     double beta;
     int igrid_c;
+    double rho;
+    double pp;
+    double gamma_rel;
 } GRMHD;
 
 typedef struct block {

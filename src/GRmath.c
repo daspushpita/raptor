@@ -468,7 +468,7 @@ void CSS_to_BL_u(double *CSSphoton_u, double *BLphoton_u) {
     double th = X_BL_u[2];
     double phi = X_BL_u[3];
     double small  = 1.2E-30;
-    double ter0 = sqrt(r * r - z * z) + small;
+    double ter0 = sqrt(x * x + y * y) + small;
 
 
     trans[0][0] = 1;

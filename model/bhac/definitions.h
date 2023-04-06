@@ -34,7 +34,8 @@
 #define SPECFILE (1)
 #define RAD_TRANS (1)
 #define POL (1)
-#define RAYOUT (1)
+#define RAYOUT 0
+#define STAR_BB_SURFACE 1
 
 #define num_frequencies 1
 

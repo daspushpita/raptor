@@ -125,6 +125,12 @@ double radiative_transfer_unpolarized(double *lightpath, int steps,
                                       double *frequency,
                                       double IQUV[num_frequencies][4],
                                       double tau[num_frequencies]);
+
+double star_BB_emission(double *lightpath, int steps,
+                                      double *frequency,
+                                      double IQUV[num_frequencies][4],
+                                      double tau[num_frequencies],
+                                      int block, int pixel);
 // METRIC.C
 ///////////
 
@@ -325,6 +331,7 @@ void Xtoijk(double *X, int *i, int *j, int *k, double *del);
 // void get_fluid_params(double X[4], double *Ne, double *Thetae, double *B,
 //                      double *B_u, double Ucon[4], int *IN_VOLUME);
 int get_fluid_params(double X[NDIM], struct GRMHD *modvar);
+int get_fluid_params_star(double X[NDIM], struct GRMHD *modvar);
 // IO
 
 void compute_spec(struct Camera *intensity,
@@ -344,7 +351,12 @@ void write_image_hdf5(char *hdf5_filename, struct Camera *data,
 void write_uniform_camera(struct Camera *intensityfield, double frequency,
                           int freq);
 
+//Plot the geodesics to check//////////////////////////////////////////
 void write_ray_output(double X_u[], double k_u[], int block, int pixel);
+
+//Adding the output for Black Body emission from the star :-D//////////
+void write_starBB_output(double X_u[], double IQUV[num_frequencies][4], int block, int pixel);
+
 // Integrate null geodesics, perform radiative transfer calculations, and
 // compute the image.
 void calculate_image_block(struct Camera *intensityfield,

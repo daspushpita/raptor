@@ -135,12 +135,19 @@ void calculate_image_block(struct Camera *intensityfield,
         }
 
 #else
+    #if (STAR_BB_SURFACE)
+        star_BB_emission(lightpath2, steps, frequencies,
+                        (*intensityfield).IQUV[pixel],
+                        &(*intensityfield).tau[pixel],
+                        block, pixel);
+    #else    
         radiative_transfer_unpolarized(lightpath2, steps, frequencies,
                                        (*intensityfield).IQUV[pixel],
                                        &(*intensityfield).tau[pixel]);
         for (int f = 0; f < num_frequencies; f++) {
             (*intensityfield).IQUV[pixel][f][0] *= pow(frequencies[f], 3.);
         }
+    #endif 
 #endif
         free(lightpath2);
     }

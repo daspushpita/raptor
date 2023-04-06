@@ -356,11 +356,16 @@ void integrate_geodesic(double alpha, double beta, double *lightpath,
 
     // Trace light ray until it reaches the event horizon or the outer
     // cutoff, or steps > max_steps
-#if (metric == BL || metric == MBL || metric == CSS)
+#if (metric == BL || metric == MBL)
 
     // Stop condition for BL coords
     while (r_current > cutoff_inner && r_current < cutoff_outer &&
            *steps < max_steps && !TERMINATE) { // && photon_u[0] < t_final){
+
+#elif (metric == CSS)
+
+    while (r_current > cutoff_inner && r_current < cutoff_outer &&
+           *steps < max_steps && !TERMINATE) {
 #else
 
     // Stop condition for KS coords
@@ -428,3 +433,5 @@ void integrate_geodesic(double alpha, double beta, double *lightpath,
         *steps = *steps + 1;
     }
 }
+
+

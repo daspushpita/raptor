@@ -312,6 +312,7 @@ void write_VTK_image(FILE *fp, double *intensityfield, double *lambdafield,
         }
     fprintf(stdout, "Integrated flux density = %.5e\n", flux);
 }
+
 //First checking the unpolarized version and plotting geodesics////
 void write_ray_output(double X_u[4], double k_u[4], int block, int pixel) {
 
@@ -342,6 +343,37 @@ void write_ray_output(double X_u[4], double k_u[4], int block, int pixel) {
     fprintf(rayfile, "%e %e %e %e\n", k_u[0], k_u[1], k_u[2], k_u[3]);
 
     fclose(rayfile);
+}
+
+void write_starBB_output(double X_u[4], double IQUV[num_frequencies][4], int block, int pixel) {
+
+    char fname[20];
+    FILE *starBB;
+    char star_folder[64] = "output-star";
+    struct stat st = {0};
+    double r_current = get_r(X_u);
+
+    if (stat(star_folder, &st) == -1) {
+        mkdir(star_folder, 0700);
+    }
+
+    sprintf(fname, "%s/data_starBB.csv", star_folder);
+
+    if (stat(fname, &st) == -1) {
+        starBB = fopen(fname, "w");
+
+        fprintf(starBB, "x_0 x_1 x_2 x_3 radius ");
+        fprintf(starBB, "Intensity\n");
+
+        fclose(starBB);
+    }
+
+    starBB = fopen(fname, "a");
+
+    fprintf(starBB, "%e %e %e %e %e ", X_u[0], X_u[1], X_u[2], X_u[3], r_current);
+    fprintf(starBB, "%e\n", IQUV[0][0]); // At the moment only works for one frequency
+
+    fclose(starBB);
 }
 
 // Outputs the ACG camera struct with a uniform resolution

@@ -143,3 +143,70 @@ double radiative_transfer_unpolarized(double *lightpath, int steps,
 
     return 1;
 }
+
+
+double star_BB_emission(double *lightpath, int steps,
+                        double *frequency, double IQUV[num_frequencies][4],
+                        double tau[num_frequencies], int block, int pixel) {
+
+    int path_counter;
+
+    double X_u[4], k_d[4], k_u[4], k_u_s[4];
+    double TMArt;
+    //double sigmaa = 5.6704e-5; //Stefan Boltzmann Constant in cgs units  
+
+    double Rg = GGRAV * MBH / SPEED_OF_LIGHT / SPEED_OF_LIGHT; // Rg in cm
+    double g_dd[4][4], g_uu[4][4];
+
+    double dtau_old = 0;
+
+    struct GRMHD modvar;
+
+    LOOP_i {
+        modvar.U_u[i] = 0;
+        modvar.U_d[i] = 0;
+    }
+    modvar.igrid_c = -1;
+    modvar.rho = 0;
+    modvar.pp = 0.;
+
+    path_counter = steps-1;
+
+    LOOP_i {
+        X_u[i] = lightpath[path_counter * 9 + i];
+        k_u[i] = lightpath[path_counter * 9 + 4 + i];
+    }
+
+    double radii = get_r(X_u);
+
+    metric_dd(X_u, g_dd);
+    metric_uu(X_u, g_uu);
+
+    if (get_fluid_params_star(X_u, &modvar)) {
+        //fprintf(stderr,"steps, length %d %d %e\n", steps-1, sizeof(lightpath), radii);
+        lower_index(X_u, k_u, k_d);
+
+        TMArt = -(modvar.rho + modvar.pp * modvar.gamma_rel/(modvar.gamma_rel - 1.))* modvar.U_u[1] * modvar.U_d[0];
+        // This is the mass energy flux in code units (I think?)
+        TMArt = TMArt * RHO_unit * SPEED_OF_LIGHT * SPEED_OF_LIGHT * SPEED_OF_LIGHT;
+        // Now this is in cgs units///
+
+        for (int f = 0; f < num_frequencies; f++) {
+
+            // Scale the wave vector to correct energy
+            LOOP_i k_u_s[i] =
+                k_u[i] * PLANCK_CONSTANT * frequency[f] /
+                (ELECTRON_MASS * SPEED_OF_LIGHT * SPEED_OF_LIGHT);
+
+            // lower the index of the wavevector
+            lower_index(X_u, k_u_s, k_d);
+
+            tau[f] += 0.;
+
+            IQUV[f][0] = TMArt;
+        }
+        write_starBB_output(X_u, IQUV, block, pixel);
+    }
+    return 1;
+}
+
