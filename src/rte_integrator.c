@@ -153,7 +153,7 @@ double BB_spectrum(double nu, double Temperature){
     cons2 = PLANCK_CONSTANT / BOLTZMANN_CONSTANT;
     Intensity = cons1 * nu * nu * nu / (exp(cons2 * nu / Temperature) - 1.);
 
-    return Intensity/(nu * nu * nu);
+    return Intensity;
 }
 
 double star_BB_emission(double *lightpath, int steps,
@@ -216,9 +216,12 @@ double star_BB_emission(double *lightpath, int steps,
             // lower the index of the wavevector
             lower_index(X_u, k_u_s, k_d);
 
+            // Compute the photon frequency in the plasma frame:
+            nu_p = freq_in_plasma_frame(modvar.U_u, k_d);
+
             tau[f] += 0.;
 
-            IQUV[f][0] = BB_spectrum(frequency[f], Temp);
+            IQUV[f][0] = BB_spectrum(nu_p, Temp)/(nu_p * nu_p * nu_p);
             //write_starBB_output(X_u, IQUV, block, pixel, frequency);
         }
     }
