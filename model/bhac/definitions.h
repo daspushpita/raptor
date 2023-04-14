@@ -36,6 +36,7 @@
 #define POL (1)
 #define RAYOUT 0
 #define STAR_BB_SURFACE 1
+#define PPM 0
 
 #define num_frequencies 1
 

@@ -92,6 +92,178 @@ int main(int argc, char *argv[]) {
     // MAIN PROGRAM LOOP
     ////////////////////
 
+#if (STAR_BB_SURFACE)
+
+    #if (PPM)
+        int nphi = 0;
+        int phi_tot = 1;
+        double dphi = 2. * M_PI/(double)phi_tot;
+
+        fprintf(stderr, "\nNumber of frequencies to compute: %d\n",
+            num_frequencies);
+        double energy_spectrum[num_frequencies][nspec];
+        double frequencies[num_frequencies];
+
+        struct Camera *intensityfield;
+
+        init_camera(&intensityfield);
+
+        #if (FREQS == FREQLOG)
+            for (int f = 0; f < num_frequencies; f++) { // For all frequencies...
+                frequencies[f] = FREQ_MIN * pow(10., (double)f / (double)FREQS_PER_DEC);
+                fprintf(stderr, "freq = %+.15e\n", frequencies[f]);
+            }
+        #elif (FREQS == FREQFILE)
+            FILE *input;
+            input = fopen("./frequencies.txt", "r");
+
+            if (input == NULL) {
+                fprintf(stderr, "Cannot read frequencies.txt\n");
+                exit(1);
+            }
+            for (int f = 0; f < num_frequencies; f++) {
+                fscanf(input, "%lf", &frequencies[f]);
+                fprintf(stderr, "freq = %+.15e\n", frequencies[f]);
+            }
+        #endif
+
+        fprintf(stderr, "\nStarting ray tracing\n\n");
+
+        #if (SMR)
+            prerun_refine(&intensityfield);
+        #endif
+
+        for (nphi = 0; nphi < phi_tot; nphi++) { // For all phi...
+                
+            for (int f = 0; f < num_frequencies; f++) { // For all frequencies...
+                for (int s = 0; s < nspec; s++)
+                    energy_spectrum[f][s] = 0.;
+            }
+
+            double phi = nphi * dphi;
+            int block = 0;
+            
+            while (block  < tot_blocks) { // block_total
+                if (block % (25) == 0)
+                    fprintf(stderr, "block %d of total %d\n", block, tot_blocks);
+
+                calculate_image_block(&intensityfield[block], frequencies, block, phi);
+                #if (AMR)
+                    if (refine_block(intensityfield[block])) {
+                        add_block(&intensityfield, block);
+                    } else {
+                        block++;
+                    }
+                #else
+                    block++;
+                #endif
+            }
+
+            fprintf(stderr, "\nRay tracing done for phi %d!\n\n", nphi);
+
+            compute_spec(intensityfield, energy_spectrum);
+
+            #if (USERSPEC)
+                compute_spec_user(intensityfield, energy_spectrum);
+            #endif
+
+            fprintf(stderr, "\nFor PPM Energy Spectrum is the Intensity\n\n");
+
+            fprintf(stderr, "Frequency %.5e Hz Integrated flux density = %.5e Jy\n",
+                frequencies[0], JANSKY_FACTOR * energy_spectrum[0][0]);
+
+            for (int f = 0; f < num_frequencies; f++) {
+                write_starBB_spectrum(energy_spectrum, frequencies, f, phi); 
+            }
+        }
+        free(intensityfield);
+        fprintf(stderr, "\nThat's all folks!\n");
+        
+    #else
+        fprintf(stderr, "\nNumber of frequencies to compute: %d\n",
+            num_frequencies);
+        double energy_spectrum[num_frequencies][nspec];
+        double frequencies[num_frequencies];
+
+        struct Camera *intensityfield;
+
+        init_camera(&intensityfield);
+
+        for (int f = 0; f < num_frequencies; f++) { // For all frequencies...
+            for (int s = 0; s < nspec; s++)
+                energy_spectrum[f][s] = 0.;
+        }
+
+        #if (FREQS == FREQLOG)
+            for (int f = 0; f < num_frequencies; f++) { // For all frequencies...
+                frequencies[f] = FREQ_MIN * pow(10., (double)f / (double)FREQS_PER_DEC);
+                fprintf(stderr, "freq = %+.15e\n", frequencies[f]);
+            }
+        #elif (FREQS == FREQFILE)
+            FILE *input;
+            input = fopen("./frequencies.txt", "r");
+
+            if (input == NULL) {
+                fprintf(stderr, "Cannot read frequencies.txt\n");
+                exit(1);
+            }
+            for (int f = 0; f < num_frequencies; f++) {
+                fscanf(input, "%lf", &frequencies[f]);
+                fprintf(stderr, "freq = %+.15e\n", frequencies[f]);
+            }
+        #endif
+
+        fprintf(stderr, "\nStarting ray tracing\n\n");
+
+        #if (SMR)
+            prerun_refine(&intensityfield);
+        #endif
+
+        int block = 0;
+        double phi = 0.;
+
+        while (block  < tot_blocks) { // block_total
+            if (block % (25) == 0)
+                fprintf(stderr, "block %d of total %d\n", block, tot_blocks);
+
+            calculate_image_block(&intensityfield[block], frequencies, block, phi);
+            #if (AMR)
+                if (refine_block(intensityfield[block])) {
+                    add_block(&intensityfield, block);
+                } else {
+                    block++;
+                }
+            #else
+                block++;
+            #endif
+        }
+
+        fprintf(stderr, "\nRay tracing done!\n\n");
+
+        compute_spec(intensityfield, energy_spectrum);
+
+        #if (USERSPEC)
+            compute_spec_user(intensityfield, energy_spectrum);
+        #endif
+    #endif
+
+    // WRITE OUTPUT FILES
+    /////////////////////
+
+    output_files(intensityfield, energy_spectrum, frequencies);
+
+    #if (UNIF)
+        write_uniform_camera(intensityfield, frequencies[0], 0);
+    #endif
+    // FREE ALLOCATED POINTERS
+    //////////////////////////
+
+    free(intensityfield);
+
+    fprintf(stderr, "\nThat's all folks!\n");
+
+#else
+
     fprintf(stderr, "\nNumber of frequencies to compute: %d\n",
             num_frequencies);
     double energy_spectrum[num_frequencies][nspec];
@@ -106,70 +278,74 @@ int main(int argc, char *argv[]) {
             energy_spectrum[f][s] = 0.;
     }
 
-#if (FREQS == FREQLOG)
-    for (int f = 0; f < num_frequencies; f++) { // For all frequencies...
-        frequencies[f] = FREQ_MIN * pow(10., (double)f / (double)FREQS_PER_DEC);
-        fprintf(stderr, "freq = %+.15e\n", frequencies[f]);
-    }
-#elif (FREQS == FREQFILE)
-    FILE *input;
-    input = fopen("./frequencies.txt", "r");
+    #if (FREQS == FREQLOG)
+        for (int f = 0; f < num_frequencies; f++) { // For all frequencies...
+            frequencies[f] = FREQ_MIN * pow(10., (double)f / (double)FREQS_PER_DEC);
+            fprintf(stderr, "freq = %+.15e\n", frequencies[f]);
+        }
+    #elif (FREQS == FREQFILE)
+        FILE *input;
+        input = fopen("./frequencies.txt", "r");
 
-    if (input == NULL) {
-        fprintf(stderr, "Cannot read frequencies.txt\n");
-        exit(1);
-    }
-    for (int f = 0; f < num_frequencies; f++) {
-        fscanf(input, "%lf", &frequencies[f]);
-        fprintf(stderr, "freq = %+.15e\n", frequencies[f]);
-    }
-#endif
+        if (input == NULL) {
+            fprintf(stderr, "Cannot read frequencies.txt\n");
+            exit(1);
+        }
+        for (int f = 0; f < num_frequencies; f++) {
+            fscanf(input, "%lf", &frequencies[f]);
+            fprintf(stderr, "freq = %+.15e\n", frequencies[f]);
+        }
+    #endif
 
     fprintf(stderr, "\nStarting ray tracing\n\n");
 
-#if (SMR)
-    prerun_refine(&intensityfield);
-#endif
+    #if (SMR)
+        prerun_refine(&intensityfield);
+    #endif
 
     int block = 0;
+    double phi = 0.;
 
     while (block  < tot_blocks) { // block_total
         if (block % (25) == 0)
             fprintf(stderr, "block %d of total %d\n", block, tot_blocks);
 
-        calculate_image_block(&intensityfield[block], frequencies, block);
-#if (AMR)
-        if (refine_block(intensityfield[block])) {
-            add_block(&intensityfield, block);
-        } else {
+        calculate_image_block(&intensityfield[block], frequencies, block, phi);
+        #if (AMR)
+            if (refine_block(intensityfield[block])) {
+                add_block(&intensityfield, block);
+            } else {
+                block++;
+            }
+        #else
             block++;
-        }
-#else
-        block++;
-#endif
+        #endif
     }
 
     fprintf(stderr, "\nRay tracing done!\n\n");
 
     compute_spec(intensityfield, energy_spectrum);
 
-#if (USERSPEC)
-    compute_spec_user(intensityfield, energy_spectrum);
-#endif
+    #if (USERSPEC)
+        compute_spec_user(intensityfield, energy_spectrum);
+    #endif
+
     // WRITE OUTPUT FILES
     /////////////////////
 
     output_files(intensityfield, energy_spectrum, frequencies);
 
-#if (UNIF)
-    write_uniform_camera(intensityfield, frequencies[0], 0);
-#endif
+    #if (UNIF)
+        write_uniform_camera(intensityfield, frequencies[0], 0);
+    #endif
     // FREE ALLOCATED POINTERS
     //////////////////////////
 
     free(intensityfield);
 
     fprintf(stderr, "\nThat's all folks!\n");
+
+#endif
 
     // END OF PROGRAM
     /////////////////

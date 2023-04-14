@@ -1207,10 +1207,10 @@ void connection_udd(double X_u[4], double gamma[4][4][4]) {
 // Then construct k_u using E, L, Q
 // The photons all start at the camera location
 void initialize_photon(double alpha, double beta, double photon_u[8],
-                       double t_init) {
+                       double t_init, double phi) {
 
     double mu0 = cos(INCLINATION / 180. * M_PI);
-    double Xcam_u[4] = {t_init, logscale ? log(rcam) : rcam, acos(mu0), 0};
+    double Xcam_u[4] = {t_init, logscale ? log(rcam) : rcam, acos(mu0), phi};
     double En = 1.;
     double E2 = En * En;
     double ll = -alpha * sqrt(1. - mu0 * mu0);

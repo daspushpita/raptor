@@ -144,6 +144,17 @@ double radiative_transfer_unpolarized(double *lightpath, int steps,
     return 1;
 }
 
+double BB_spectrum(double nu, double Temperature){
+
+    double Intensity, cons1, cons2;
+
+    
+    cons1 = 2 * PLANCK_CONSTANT / (SPEED_OF_LIGHT * SPEED_OF_LIGHT);
+    cons2 = PLANCK_CONSTANT / BOLTZMANN_CONSTANT;
+    Intensity = cons1 * nu * nu * nu / (exp(cons2 * nu / Temperature) - 1.);
+
+    return Intensity/(nu * nu * nu);
+}
 
 double star_BB_emission(double *lightpath, int steps,
                         double *frequency, double IQUV[num_frequencies][4],
@@ -152,8 +163,8 @@ double star_BB_emission(double *lightpath, int steps,
     int path_counter;
 
     double X_u[4], k_d[4], k_u[4], k_u_s[4];
-    double TMArt;
-    //double sigmaa = 5.6704e-5; //Stefan Boltzmann Constant in cgs units  
+    double TMArt, Temp, Intensity_BB;
+    double sigmaa = 5.6704e-5; //Stefan Boltzmann Constant in cgs units  
 
     double Rg = GGRAV * MBH / SPEED_OF_LIGHT / SPEED_OF_LIGHT; // Rg in cm
     double g_dd[4][4], g_uu[4][4];
@@ -186,13 +197,17 @@ double star_BB_emission(double *lightpath, int steps,
         //fprintf(stderr,"steps, length %d %d %e\n", steps-1, sizeof(lightpath), radii);
         lower_index(X_u, k_u, k_d);
 
-        TMArt = -(modvar.rho + modvar.pp * modvar.gamma_rel/(modvar.gamma_rel - 1.))* modvar.U_u[1] * modvar.U_d[0];
         // This is the mass energy flux in code units (I think?)
-        TMArt = TMArt * RHO_unit * SPEED_OF_LIGHT * SPEED_OF_LIGHT * SPEED_OF_LIGHT;
-        // Now this is in cgs units///
+        TMArt = (modvar.rho + modvar.pp * modvar.gamma_rel/(modvar.gamma_rel - 1.)) * 
+                    fabs(modvar.U_u[1]) * modvar.U_d[0];
 
+        // Now this is in cgs units///
+        TMArt = -TMArt * RHO_unit * SPEED_OF_LIGHT * SPEED_OF_LIGHT * SPEED_OF_LIGHT;  
+        Temp =  pow(10,7);//pow(TMArt/sigmaa, 1./4);
+        //fprintf(stderr,"Temperature %e\n", Temp); This is fine :-D
         for (int f = 0; f < num_frequencies; f++) {
 
+            IQUV[f][0] = 0.; //Initializing everything to 0
             // Scale the wave vector to correct energy
             LOOP_i k_u_s[i] =
                 k_u[i] * PLANCK_CONSTANT * frequency[f] /
@@ -203,9 +218,9 @@ double star_BB_emission(double *lightpath, int steps,
 
             tau[f] += 0.;
 
-            IQUV[f][0] = TMArt;
+            IQUV[f][0] = BB_spectrum(frequency[f], Temp);
+            //write_starBB_output(X_u, IQUV, block, pixel, frequency);
         }
-        write_starBB_output(X_u, IQUV, block, pixel);
     }
     return 1;
 }

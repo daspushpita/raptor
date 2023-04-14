@@ -345,7 +345,8 @@ void write_ray_output(double X_u[4], double k_u[4], int block, int pixel) {
     fclose(rayfile);
 }
 
-void write_starBB_output(double X_u[4], double IQUV[num_frequencies][4], int block, int pixel) {
+void write_starBB_output(double X_u[4], double IQUV[num_frequencies][4], 
+                        int block, int pixel, double frequencies[num_frequencies]) {
 
     char fname[20];
     FILE *starBB;
@@ -371,9 +372,36 @@ void write_starBB_output(double X_u[4], double IQUV[num_frequencies][4], int blo
     starBB = fopen(fname, "a");
 
     fprintf(starBB, "%e %e %e %e %e ", X_u[0], X_u[1], X_u[2], X_u[3], r_current);
-    fprintf(starBB, "%e\n", IQUV[0][0]); // At the moment only works for one frequency
+    fprintf(starBB, "%e\n", IQUV[0][0] * pow(frequencies[0], 3.)); // At the moment only works for one frequency
 
     fclose(starBB);
+}
+
+void write_starBB_spectrum(double energy_spectrum[num_frequencies][nspec],
+                            double frequencies[num_frequencies], int freq, double phi) {
+
+    char fname[128];
+    FILE *starBBspec;
+    char star_folder[64] = "output-star";
+    struct stat st = {0};
+
+    if (stat(star_folder, &st) == -1) {
+        mkdir(star_folder, 0700);
+    }
+
+    sprintf(fname, "%s/data_starBB_spectrum.csv", star_folder);
+
+    if (stat(fname, &st) == -1) {
+        starBBspec = fopen(fname, "w");
+
+        fprintf(starBBspec, "Flux Phi frequency\n");
+
+        fclose(starBBspec);
+    }
+
+    starBBspec = fopen(fname, "a");
+    fprintf(starBBspec, "%e %e %e\n ", JANSKY_FACTOR * energy_spectrum[freq][0], phi, frequencies[freq]);
+    fclose(starBBspec);
 }
 
 // Outputs the ACG camera struct with a uniform resolution

@@ -114,7 +114,7 @@ void f_geodesic(double *y, double *fvector);
 // in lightpath
 void integrate_geodesic(double alpha, double beta, double *lightpath,
                         int *steps, double cutoff_inner,
-                        int block, int pixel);
+                        int block, int pixel, double phi);
 
 void radiative_transfer_polarized(double *lightpath, int steps,
                                   double frequency, double *f_x, double *f_y,
@@ -150,7 +150,7 @@ void connection_num_udd(double X_u[4], double gamma_udd[4][4][4]);
 void connection_udd(double X_u[4], double gamma_udd[4][4][4]);
 
 // This function initializes a single 'superphoton' or light ray.
-void initialize_photon(double alpha, double beta, double k_u[4], double t_init);
+void initialize_photon(double alpha, double beta, double k_u[4], double t_init, double phi);
 
 // Transformation functions
 double Xg2_approx_rand(double Xr2);
@@ -227,6 +227,11 @@ double absorption_coeff_TH(double j_nu, double nu, double THETA_e);
 
 // Planck function
 double planck_function(double nu, double THETA_e);
+
+// BB Spectrum
+double BB_spectrum(double nu, double Temperature);
+//I know the plank function is the same, but it expects electron temperature
+//This one takes Temperature and returns I/nu^3
 
 // Perform radiative transfer along the ray stored in "lightpath"
 double radiative_transfer(double *lightpath, int steps, double frequency);
@@ -355,12 +360,18 @@ void write_uniform_camera(struct Camera *intensityfield, double frequency,
 void write_ray_output(double X_u[], double k_u[], int block, int pixel);
 
 //Adding the output for Black Body emission from the star :-D//////////
-void write_starBB_output(double X_u[], double IQUV[num_frequencies][4], int block, int pixel);
+void write_starBB_output(double X_u[], double IQUV[num_frequencies][4], 
+                        int block, int pixel, double frequencies[num_frequencies]);
 
+//Plot the pulses
+void write_starBB_spectrum(double spectrum[num_frequencies][nspec],
+                            double frequencies[num_frequencies], int freq, double phi);
+
+///////////////////////////////////////////////////////////////////////////////////
 // Integrate null geodesics, perform radiative transfer calculations, and
 // compute the image.
 void calculate_image_block(struct Camera *intensityfield,
-                           double frequencies[num_frequencies], int block);
+                           double frequencies[num_frequencies], int block, double phi);
 /// CAMERA.C
 void init_camera(struct Camera **intensityfield);
 

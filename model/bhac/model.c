@@ -1425,9 +1425,7 @@ int get_fluid_params_star(double X[NDIM], struct GRMHD *modvar) {
     double yc = r * sin(X[2]) * sin(X[3]);
     double rc = sqrt(xc * xc + yc * yc);
 
-    if (r > RT_OUTER_CUTOFF){ //||
-        //(*modvar).theta_e > THETAE_MAX ||
-        //(*modvar).theta_e < THETAE_MIN) { // excludes all spine emmission
+    if (r > RT_OUTER_CUTOFF){
         (*modvar).n_e = 0;
         return 0;
     }

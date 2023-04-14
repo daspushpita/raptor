@@ -333,7 +333,7 @@ void f_geodesic(double *y, double *fvector) {
 // Integrate the null geodesic defined by "photon_u"
 void integrate_geodesic(double alpha, double beta, double *lightpath,
                         int *steps, double cutoff_inner,
-                        int block, int pixel) {
+                        int block, int pixel, double phi) {
     int q;
     double t_init = 0.;
     double dlambda_adaptive = -0.1;
@@ -342,7 +342,7 @@ void integrate_geodesic(double alpha, double beta, double *lightpath,
     double X_u[4], k_u[4];
     double photon_u[8];
     // Create initial ray conditions
-    initialize_photon(alpha, beta, photon_u, t_init);
+    initialize_photon(alpha, beta, photon_u, t_init, phi);
     LOOP_i X_u[i] = photon_u[i];
     LOOP_i k_u[i] = photon_u[i+4];
     // Current r-coordinate
@@ -356,16 +356,12 @@ void integrate_geodesic(double alpha, double beta, double *lightpath,
 
     // Trace light ray until it reaches the event horizon or the outer
     // cutoff, or steps > max_steps
-#if (metric == BL || metric == MBL)
+#if (metric == BL || metric == MBL || metric == CSS)
 
     // Stop condition for BL coords
     while (r_current > cutoff_inner && r_current < cutoff_outer &&
            *steps < max_steps && !TERMINATE) { // && photon_u[0] < t_final){
-
-#elif (metric == CSS)
-
-    while (r_current > cutoff_inner && r_current < cutoff_outer &&
-           *steps < max_steps && !TERMINATE) {
+            
 #else
 
     // Stop condition for KS coords

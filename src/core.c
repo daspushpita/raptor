@@ -105,7 +105,7 @@ void read_model(char *argv[]) {
 // For a single block this function will iterate over the pixels and call
 // geodesic integrations as well as radiation transfer
 void calculate_image_block(struct Camera *intensityfield,
-                           double frequencies[num_frequencies], int block) {
+                           double frequencies[num_frequencies], int block, double phi) {
 
 #pragma omp parallel for shared(frequencies, intensityfield, p)                \
     schedule(static, 1)
@@ -119,36 +119,44 @@ void calculate_image_block(struct Camera *intensityfield,
         double f_y = 0.;
         double p = 0.;
 #endif
-        // INTEGRATE THIS PIXEL'S GEODESIC
+
+#if (STAR_BB_SURFACE)
+
         integrate_geodesic((*intensityfield).alpha[pixel],
-                           (*intensityfield).beta[pixel], lightpath2, &steps,
-                           CUTOFF_INNER, block, pixel);
+                            (*intensityfield).beta[pixel], lightpath2, &steps,
+                            CUTOFF_INNER, block, pixel, phi);
 
-#if (POL)
-        for (int f = 0; f < num_frequencies; f++) {
-
-            radiative_transfer_polarized(lightpath2, steps, frequencies[f],
-                                         &f_x, &f_y, &p, 0,
-                                         (*intensityfield).IQUV[pixel][f],
-                                         &(*intensityfield).tau[pixel][f],
-                                         &(*intensityfield).tauF[pixel][f]);
-        }
-
-#else
-    #if (STAR_BB_SURFACE)
         star_BB_emission(lightpath2, steps, frequencies,
                         (*intensityfield).IQUV[pixel],
                         &(*intensityfield).tau[pixel],
                         block, pixel);
-    #else    
-        radiative_transfer_unpolarized(lightpath2, steps, frequencies,
-                                       (*intensityfield).IQUV[pixel],
-                                       &(*intensityfield).tau[pixel]);
         for (int f = 0; f < num_frequencies; f++) {
             (*intensityfield).IQUV[pixel][f][0] *= pow(frequencies[f], 3.);
         }
-    #endif 
-#endif
+#else
+    double phi = 0.;
+    // INTEGRATE THIS PIXEL'S GEODESIC
+    integrate_geodesic((*intensityfield).alpha[pixel],
+                        (*intensityfield).beta[pixel], lightpath2, &steps,
+                        CUTOFF_INNER, block, pixel, phi);
+
+    #if (POL)
+        for (int f = 0; f < num_frequencies; f++) {
+            radiative_transfer_polarized(lightpath2, steps, frequencies[f],
+                                        &f_x, &f_y, &p, 0,
+                                        (*intensityfield).IQUV[pixel][f],
+                                        &(*intensityfield).tau[pixel][f],
+                                        &(*intensityfield).tauF[pixel][f]);
+        }
+    #else   
+            radiative_transfer_unpolarized(lightpath2, steps, frequencies,
+                                       (*intensityfield).IQUV[pixel],
+                                       &(*intensityfield).tau[pixel]);
+            for (int f = 0; f < num_frequencies; f++) {
+                (*intensityfield).IQUV[pixel][f][0] *= pow(frequencies[f], 3.);
+            }
+    #endif
+#endif 
         free(lightpath2);
     }
 #pragma omp barrier
@@ -184,8 +192,12 @@ void compute_spec(struct Camera *intensityfield,
                 energy_spectrum[freq][3] += S_V * dA;
 
 #else
-                energy_spectrum[freq][0] +=
-                    (intensityfield)[block].IQUV[pixel][freq][0] * dA;
+                #if (PPM)
+                    energy_spectrum[freq][0] += (intensityfield)[block].IQUV[pixel][freq][0];
+                #else
+                    energy_spectrum[freq][0] +=
+                        (intensityfield)[block].IQUV[pixel][freq][0] * dA;
+                #endif
 #endif
             }
         }
