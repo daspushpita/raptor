@@ -35,8 +35,7 @@
 #define RAD_TRANS (1)
 #define POL (1)
 #define RAYOUT 0
-#define STAR_BB_SURFACE 1
-#define PPM 0
+#define PPM 1
 
 #define num_frequencies 1
 
@@ -64,6 +63,9 @@ typedef struct Camera {
     double tauF[tot_pixels][num_frequencies];    // intensity
     double pdf[tot_pixels][num_frequencies];    // intensity
     double avg[tot_pixels][num_frequencies];    // intensity
+    #ifdef PPM
+        double geo_fac[tot_pixels][num_frequencies]; // intensity
+    #endif
     double alpha[tot_pixels];                    // impact parameter
     double beta[tot_pixels];                     // impact parameter
     double lcorner[2];                           // lower left corner of a block

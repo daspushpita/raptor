@@ -121,7 +121,7 @@ void calculate_image_block(struct Camera *intensityfield,
         double p = 0.;
 #endif
 
-#if (STAR_BB_SURFACE)
+#if (PPM)
 
         integrate_geodesic((*intensityfield).alpha[pixel],
                             (*intensityfield).beta[pixel], lightpath2, &steps,
