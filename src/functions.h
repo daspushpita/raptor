@@ -130,7 +130,9 @@ double star_BB_emission(double *lightpath, int steps,
                                       double *frequency,
                                       double IQUV[num_frequencies][4],
                                       double tau[num_frequencies],
-                                      int block, int pixel);
+                                      int block, int pixel,
+                                      double nu_plasma[num_frequencies],
+                                      double phi);
 // METRIC.C
 ///////////
 
@@ -232,6 +234,10 @@ double planck_function(double nu, double THETA_e);
 double BB_spectrum(double nu, double Temperature);
 //I know the plank function is the same, but it expects electron temperature
 //This one takes Temperature and returns I/nu^3
+
+//Compute the Doppler Boost Factor (See Juri Poutanen and Andrei M. Beloborodov 2006)
+double doppler_factor(double beta, double *frequency, 
+                        double X_u[4], double phi, double lfac);
 
 // Perform radiative transfer along the ray stored in "lightpath"
 double radiative_transfer(double *lightpath, int steps, double frequency);
@@ -361,17 +367,20 @@ void write_ray_output(double X_u[], double k_u[], int block, int pixel);
 
 //Adding the output for Black Body emission from the star :-D//////////
 void write_starBB_output(double X_u[], double IQUV[num_frequencies][4], 
-                        int block, int pixel, double frequencies[num_frequencies]);
+                        int block, int pixel, double frequencies[num_frequencies],
+                        double phi);
 
 //Plot the pulses
 void write_starBB_spectrum(double spectrum[num_frequencies][nspec],
-                            double frequencies[num_frequencies], int freq, double phi);
+                            double frequencies[num_frequencies], 
+                            double nu_plasma[num_frequencies], int freq, double phi);
 
 ///////////////////////////////////////////////////////////////////////////////////
 // Integrate null geodesics, perform radiative transfer calculations, and
 // compute the image.
 void calculate_image_block(struct Camera *intensityfield,
-                           double frequencies[num_frequencies], int block, double phi);
+                           double frequencies[num_frequencies], int block, double phi,
+                           double nu_plasma[num_frequencies]);
 /// CAMERA.C
 void init_camera(struct Camera **intensityfield);
 

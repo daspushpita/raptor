@@ -96,21 +96,19 @@ int main(int argc, char *argv[]) {
 
     #if (PPM)
         int nphi = 0;
-        int phi_tot = 1;
+        int phi_tot = 50;
         double dphi = 2. * M_PI/(double)phi_tot;
 
         fprintf(stderr, "\nNumber of frequencies to compute: %d\n",
             num_frequencies);
         double energy_spectrum[num_frequencies][nspec];
         double frequencies[num_frequencies];
-
-        struct Camera *intensityfield;
-
-        init_camera(&intensityfield);
+        double nu_plasma[num_frequencies];
 
         #if (FREQS == FREQLOG)
             for (int f = 0; f < num_frequencies; f++) { // For all frequencies...
                 frequencies[f] = FREQ_MIN * pow(10., (double)f / (double)FREQS_PER_DEC);
+                nu_plasma[f] = 0.;
                 fprintf(stderr, "freq = %+.15e\n", frequencies[f]);
             }
         #elif (FREQS == FREQFILE)
@@ -129,11 +127,15 @@ int main(int argc, char *argv[]) {
 
         fprintf(stderr, "\nStarting ray tracing\n\n");
 
-        #if (SMR)
-            prerun_refine(&intensityfield);
-        #endif
-
         for (nphi = 0; nphi < phi_tot; nphi++) { // For all phi...
+
+            struct Camera *intensityfield;
+
+            init_camera(&intensityfield);
+
+            #if (SMR)
+                prerun_refine(&intensityfield);
+            #endif
                 
             for (int f = 0; f < num_frequencies; f++) { // For all frequencies...
                 for (int s = 0; s < nspec; s++)
@@ -147,7 +149,7 @@ int main(int argc, char *argv[]) {
                 if (block % (25) == 0)
                     fprintf(stderr, "block %d of total %d\n", block, tot_blocks);
 
-                calculate_image_block(&intensityfield[block], frequencies, block, phi);
+                calculate_image_block(&intensityfield[block], frequencies, block, phi, nu_plasma);
                 #if (AMR)
                     if (refine_block(intensityfield[block])) {
                         add_block(&intensityfield, block);
@@ -173,10 +175,10 @@ int main(int argc, char *argv[]) {
                 frequencies[0], JANSKY_FACTOR * energy_spectrum[0][0]);
 
             for (int f = 0; f < num_frequencies; f++) {
-                write_starBB_spectrum(energy_spectrum, frequencies, f, phi); 
+                write_starBB_spectrum(energy_spectrum, frequencies, nu_plasma, f, phi); 
             }
+            free(intensityfield);
         }
-        free(intensityfield);
         fprintf(stderr, "\nThat's all folks!\n");
         
     #else
@@ -245,22 +247,22 @@ int main(int argc, char *argv[]) {
         #if (USERSPEC)
             compute_spec_user(intensityfield, energy_spectrum);
         #endif
+
+        // WRITE OUTPUT FILES
+        /////////////////////
+
+        output_files(intensityfield, energy_spectrum, frequencies);
+
+        #if (UNIF)
+            write_uniform_camera(intensityfield, frequencies[0], 0);
+        #endif
+        // FREE ALLOCATED POINTERS
+        //////////////////////////
+
+        free(intensityfield);
+
+        fprintf(stderr, "\nThat's all folks!\n");
     #endif
-
-    // WRITE OUTPUT FILES
-    /////////////////////
-
-    output_files(intensityfield, energy_spectrum, frequencies);
-
-    #if (UNIF)
-        write_uniform_camera(intensityfield, frequencies[0], 0);
-    #endif
-    // FREE ALLOCATED POINTERS
-    //////////////////////////
-
-    free(intensityfield);
-
-    fprintf(stderr, "\nThat's all folks!\n");
 
 #else
 

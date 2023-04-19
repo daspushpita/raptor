@@ -156,14 +156,38 @@ double BB_spectrum(double nu, double Temperature){
     return Intensity;
 }
 
+double doppler_factor(double beta, double *frequency, 
+                        double X_u[4], double phi, double lfac){
+
+    double sin_alpha, cos_alpha, cos_psi, theta1, dopp_factor, delta_1;
+    double r_s = 2. * GGRAV * MBH / (SPEED_OF_LIGHT * SPEED_OF_LIGHT);
+    sin_alpha = (beta * sqrt(1. - (r_s/rstar))) / rstar;
+    cos_alpha = sqrt(1. - (sin_alpha * sin_alpha));
+
+    theta1 =  X_u[2];
+    cos_psi = cos(INCLINATION) * cos(theta1) + sin(INCLINATION) *
+                sin(theta1) * cos(phi);
+    
+    double sin_psi = sqrt(1. - cos_psi * cos_psi);
+    double cos_zeta = - (sin_alpha / sin_psi) * sin(INCLINATION) * sin(phi);
+    double beta_1 = sqrt(1. - 1./lfac);
+    delta_1 = 1./ (lfac * (1. - beta_1 * cos_zeta));
+    dopp_factor = delta_1 * sqrt(1. - (r_s/rstar));
+
+    return 1;
+}
+
 double star_BB_emission(double *lightpath, int steps,
                         double *frequency, double IQUV[num_frequencies][4],
-                        double tau[num_frequencies], int block, int pixel) {
+                        double tau[num_frequencies], int block, int pixel, 
+                        double nu_plasma[num_frequencies], double phi) {
 
     int path_counter;
 
-    double X_u[4], k_d[4], k_u[4], k_u_s[4];
+    double X_u[4], k_d[4], k_u[4], k_u_s[4], photon_CSSuu[8], photon_BLuu[8], uBL_u[4], uBL_d[4];
     double TMArt, Temp, Intensity_BB;
+    double nu_p;
+
     double sigmaa = 5.6704e-5; //Stefan Boltzmann Constant in cgs units  
 
     double Rg = GGRAV * MBH / SPEED_OF_LIGHT / SPEED_OF_LIGHT; // Rg in cm
@@ -194,16 +218,29 @@ double star_BB_emission(double *lightpath, int steps,
     metric_uu(X_u, g_uu);
 
     if (get_fluid_params_star(X_u, &modvar)) {
-        //fprintf(stderr,"steps, length %d %d %e\n", steps-1, sizeof(lightpath), radii);
+        
         lower_index(X_u, k_u, k_d);
+        for (int i = 0; i < DIM; i++){
+                photon_CSSuu[i] = X_u[i];
+                photon_CSSuu[i + 4] = modvar.U_u[i];
+        }
+        CSS_to_BL_u(photon_CSSuu,photon_BLuu);
+
+        for (int i = 0; i < DIM; i++){
+            
+            uBL_u[i] = photon_BLuu[i + 4];
+        }
+
+        lower_index(X_u, uBL_u, uBL_d);
 
         // This is the mass energy flux in code units (I think?)
         TMArt = (modvar.rho + modvar.pp * modvar.gamma_rel/(modvar.gamma_rel - 1.)) * 
-                    fabs(modvar.U_u[1]) * modvar.U_d[0];
+                    fabs(uBL_u[1]) * uBL_d[0];
 
         // Now this is in cgs units///
         TMArt = -TMArt * RHO_unit * SPEED_OF_LIGHT * SPEED_OF_LIGHT * SPEED_OF_LIGHT;  
-        Temp =  pow(10,7);//pow(TMArt/sigmaa, 1./4);
+        Temp =  pow(TMArt/sigmaa, 1./4.);
+
         //fprintf(stderr,"Temperature %e\n", Temp); This is fine :-D
         for (int f = 0; f < num_frequencies; f++) {
 
@@ -219,10 +256,14 @@ double star_BB_emission(double *lightpath, int steps,
             // Compute the photon frequency in the plasma frame:
             nu_p = freq_in_plasma_frame(modvar.U_u, k_d);
 
+
             tau[f] += 0.;
 
             IQUV[f][0] = BB_spectrum(nu_p, Temp)/(nu_p * nu_p * nu_p);
-            //write_starBB_output(X_u, IQUV, block, pixel, frequency);
+
+            nu_plasma[f] = nu_p;
+            write_starBB_output(X_u, IQUV, block, pixel, frequency, phi);
+
         }
     }
     return 1;
