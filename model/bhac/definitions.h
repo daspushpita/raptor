@@ -33,7 +33,7 @@
 #define IMGFILE (1)
 #define SPECFILE (1)
 #define RAD_TRANS (1)
-#define POL (1)
+#define POL (0)
 #define RAYOUT 0
 #define PPM 1
 
@@ -61,11 +61,6 @@ typedef struct Camera {
     double IQUV[tot_pixels][num_frequencies][4]; // intensity
     double tau[tot_pixels][num_frequencies];     // intensity
     double tauF[tot_pixels][num_frequencies];    // intensity
-    double pdf[tot_pixels][num_frequencies];    // intensity
-    double avg[tot_pixels][num_frequencies];    // intensity
-    #ifdef PPM
-        double geo_fac[tot_pixels][num_frequencies][3]; // intensity
-    #endif
     double alpha[tot_pixels];                    // impact parameter
     double beta[tot_pixels];                     // impact parameter
     double lcorner[2];                           // lower left corner of a block
@@ -134,8 +129,8 @@ typedef struct Camera {
 
 #define RT_OUTER_CUTOFF (50.) // Stop polarized integration beyond this radius
 
-#define delta_num (1.e-4) // Used for numerical derivatives
-#define max_steps (1e4)   // Maximum number of integration steps
+#define delta_num (1.e-6) // Used for numerical derivatives
+#define max_steps (1e8)   // Maximum number of integration steps
 
 #define cutoff_outer (1.1 * rcam) // Outer cutoff, near flat spacetime, in M
 #define horizon_marg (1.e-2) // Stop tracing at this distance from E.H. [BL]
@@ -143,7 +138,7 @@ typedef struct Camera {
 #define VER (2)              //
 #define RK4 (3)              //
 #define RK45 (4)             //
-#define int_method (RK4)
+#define int_method (RK45)
 
 // CONSTANTS
 ////////////

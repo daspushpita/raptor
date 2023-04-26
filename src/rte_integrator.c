@@ -181,8 +181,8 @@ double doppler_factor(double beta, double frequency,
 
 double star_BB_emission(double *lightpath, int steps,
                         double *frequency, double IQUV[num_frequencies][4],
-                        double tau[num_frequencies], double geo_fac[num_frequencies][4],
-                        int block, int pixel, double beta, double alpha,
+                        double tau[num_frequencies], int block, int pixel, 
+                        double beta, double alpha,
                         double nu_plasma[num_frequencies], double phi) {
 
     int path_counter;

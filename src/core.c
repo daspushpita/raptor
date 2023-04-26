@@ -112,6 +112,7 @@ void calculate_image_block(struct Camera *intensityfield,
     schedule(static, 1)
     for (int pixel = 0; pixel < tot_pixels; pixel++) {
         int steps = 0;
+        fprintf(stderr,"alpha, beta %e %e\n", (*intensityfield).alpha[pixel], (*intensityfield).beta[pixel]);
 
         double *lightpath2 = malloc(9 * max_steps * sizeof(double));
 
@@ -126,11 +127,12 @@ void calculate_image_block(struct Camera *intensityfield,
         integrate_geodesic((*intensityfield).alpha[pixel],
                             (*intensityfield).beta[pixel], lightpath2, &steps,
                             CUTOFF_INNER, block, pixel, phi);
+        
+        //fprintf(stderr,"alpha, beta %e %e\n", (*intensityfield).alpha[pixel], (*intensityfield).beta[pixel]);
 
         star_BB_emission(lightpath2, steps, frequencies,
                         (*intensityfield).IQUV[pixel],
                         &(*intensityfield).tau[pixel],
-                        (*intensityfield).geo_fac[pixel],
                         block, pixel,(*intensityfield).beta[pixel],
                         (*intensityfield).alpha[pixel],
                         nu_plasma, phi);

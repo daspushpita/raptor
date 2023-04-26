@@ -240,8 +240,7 @@ int main(int argc, char *argv[]) {
 
     while (block  < tot_blocks) { // block_total
         if (block % (25) == 0)
-            fprintf(stderr, "block %d of total %d\n", block, tot_blocks);
-
+            fprintf(stderr, "block %d of total %d\n", block, tot_blocks);                    
         calculate_image_block(&intensityfield[block], frequencies, block, phi, nu_plasma);
         #if (AMR)
             if (refine_block(intensityfield[block])) {

@@ -79,10 +79,6 @@ void get_impact_params(struct Camera **intensityfield, int block) {
         for (int f = 0; f < num_frequencies; f++) {
             for (int s = 0; s < 4; s++) {
                 (*intensityfield)[block].IQUV[pixel][f][s] = 0;
-
-                #if (PPM == 1)
-                (*intensityfield)[block].geo_fac[pixel][f][4] = 0;
-                #endif
             }
             (*intensityfield)[block].tau[pixel][f] = 0;
             (*intensityfield)[block].tauF[pixel][f] = 0;
