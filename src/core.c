@@ -128,8 +128,6 @@ void calculate_image_block(struct Camera *intensityfield,
                             (*intensityfield).beta[pixel], lightpath2, &steps,
                             CUTOFF_INNER, block, pixel, phi);
         
-        //fprintf(stderr,"alpha, beta %e %e\n", (*intensityfield).alpha[pixel], (*intensityfield).beta[pixel]);
-
         star_BB_emission(lightpath2, steps, frequencies,
                         (*intensityfield).IQUV[pixel],
                         &(*intensityfield).tau[pixel],
