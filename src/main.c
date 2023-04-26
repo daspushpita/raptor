@@ -94,7 +94,7 @@ int main(int argc, char *argv[]) {
 
 #if (PPM)
     int nphi = 0;
-    int phi_tot = 50;
+    int phi_tot = 1; //256;
     double dphi = 2. * M_PI/(double)phi_tot;
 
     fprintf(stderr, "\nNumber of frequencies to compute: %d\n",
@@ -167,7 +167,7 @@ int main(int argc, char *argv[]) {
             compute_spec_user(intensityfield, energy_spectrum);
         #endif
 
-        fprintf(stderr, "\nFor PPM Energy Spectrum is the Intensity\n\n");
+        fprintf(stderr, "\nFor PPM Energy Spectrum is the Flux\n\n");
 
         fprintf(stderr, "Frequency %.5e Hz Integrated flux density = %.5e Jy\n",
             frequencies[0], JANSKY_FACTOR * energy_spectrum[0][0]);
@@ -198,12 +198,14 @@ int main(int argc, char *argv[]) {
             num_frequencies);
     double energy_spectrum[num_frequencies][nspec];
     double frequencies[num_frequencies];
+    double nu_plasma[num_frequencies];
 
     struct Camera *intensityfield;
 
     init_camera(&intensityfield);
 
     for (int f = 0; f < num_frequencies; f++) { // For all frequencies...
+        nu_plasma[f] = 0.;
         for (int s = 0; s < nspec; s++)
             energy_spectrum[f][s] = 0.;
     }
@@ -240,7 +242,7 @@ int main(int argc, char *argv[]) {
         if (block % (25) == 0)
             fprintf(stderr, "block %d of total %d\n", block, tot_blocks);
 
-        calculate_image_block(&intensityfield[block], frequencies, block, phi);
+        calculate_image_block(&intensityfield[block], frequencies, block, phi, nu_plasma);
         #if (AMR)
             if (refine_block(intensityfield[block])) {
                 add_block(&intensityfield, block);

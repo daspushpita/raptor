@@ -335,11 +335,11 @@ void integrate_geodesic(double alpha, double beta, double *lightpath,
                         int *steps, double cutoff_inner,
                         int block, int pixel, double phi) {
     int q;
-    double t_init = 0.;
+    double t_init = 0.; //10160.;
     double dlambda_adaptive = -0.1;
     int theta_turns = 0;
     double thetadot_prev;
-    double X_u[4], k_u[4];
+    double X_u[4], k_u[4], k_d[4];
     double photon_u[8];
     // Create initial ray conditions
     initialize_photon(alpha, beta, photon_u, t_init, phi);
@@ -359,7 +359,7 @@ void integrate_geodesic(double alpha, double beta, double *lightpath,
 #if (metric == BL || metric == MBL || metric == CSS)
 
     // Stop condition for BL coords
-    while (r_current > cutoff_inner && r_current < cutoff_outer &&
+    while (r_current > 4.2 && r_current < cutoff_outer &&
            *steps < max_steps && !TERMINATE) { // && photon_u[0] < t_final){
             
 #else
@@ -395,7 +395,7 @@ void integrate_geodesic(double alpha, double beta, double *lightpath,
             TERMINATE = 1;
 
         // Compute educational guess for an adaptive step size
-        // dlambda_adaptive = -STEPSIZE;
+        //dlambda_adaptive = -STEPSIZE;
         dlambda_adaptive = stepsize(X_u, k_u);
 
         // Advance ray/particle

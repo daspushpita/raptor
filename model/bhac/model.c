@@ -1116,7 +1116,6 @@ int get_fluid_params(double X[NDIM], struct GRMHD *modvar) {
     (*modvar).pp = uu * ((*modvar).gamma_rel - 1.);
     (*modvar).rho = rho;
 
-
     (*modvar).n_e = rho * Ne_unit + smalll;
 
     Bp[1] = interp_scalar(p[B1][igrid], c, del);
@@ -1147,6 +1146,8 @@ int get_fluid_params(double X[NDIM], struct GRMHD *modvar) {
     }
 
     double lfac = sqrt(gVdotgV + 1.);
+    
+    (*modvar).lfac = lfac;
 
     V_u[1] = gV_u[1] / lfac;
     V_u[2] = gV_u[2] / lfac;
@@ -1358,6 +1359,7 @@ int get_fluid_params_star(double X[NDIM], struct GRMHD *modvar) {
     }
 
     double lfac = sqrt(gVdotgV + 1.);
+    (*modvar).lfac = lfac;
 
     V_u[1] = gV_u[1] / lfac;
     V_u[2] = gV_u[2] / lfac;
@@ -1402,6 +1404,33 @@ int get_fluid_params_star(double X[NDIM], struct GRMHD *modvar) {
                     Xgrid[igrid][c][2] * Xgrid[igrid][c][2] +
                     Xgrid[igrid][c][3] * Xgrid[igrid][c][3]);
 
+#if (DEBUG)
+    if (isnan(Bsq) || isnan((*modvar).B)) {
+        double R2 = Xgrid[igrid][c][1] * Xgrid[igrid][c][1] +
+                    Xgrid[igrid][c][2] * Xgrid[igrid][c][2] +
+                    Xgrid[igrid][c][3] * Xgrid[igrid][c][3];
+        double a2 = a * a;
+        double r2 = (R2 - a2 +
+                     sqrt((R2 - a2) * (R2 - a2) +
+                          4. * a2 * Xgrid[igrid][c][3] * Xgrid[igrid][c][3])) *
+                    0.5;
+        fprintf(stderr, "B isnan r %e rmin %e\n", sqrt(r2), CUTOFF_INNER);
+        fprintf(stderr, "B isnan X %e %e %e %e\n", X[0], X[1], X[2], X[3]);
+        fprintf(stderr, "B isnan Xgrid %e %e %e\n", Xgrid[igrid][c][0],
+                Xgrid[igrid][c][1], Xgrid[igrid][c][2]);
+        fprintf(stderr, "B isnan Bsq %e B_u %e %e %e %e U_u %e %e %e %e\n", Bsq,
+                (*modvar).B_u[0], (*modvar).B_u[1], (*modvar).B_u[2],
+                (*modvar).B_u[3], (*modvar).U_u[0], (*modvar).U_u[1],
+                (*modvar).U_u[2], (*modvar).U_u[3]);
+        fprintf(stderr, "B isnan Bp %e %e %e\n", Bp[1], Bp[2], Bp[3]);
+        fprintf(stderr, "B isnan V_u %e %e %e\n", V_u[1], V_u[2], V_u[3]);
+        fprintf(stderr, "B isnan gVdotgV %e\n", gVdotgV);
+        fprintf(stderr, "B isnan lapse %e\n", sqrt(-g_uu[0][0]));
+        fprintf(stderr, "B isnan shift %e %e %e\n", g_uu[0][1], g_uu[0][2],
+                g_uu[0][3]);
+        exit(1);
+    }
+#endif
     double gam = neqpar[0];
 
     double beta_trans = 1.0;
@@ -1426,7 +1455,6 @@ int get_fluid_params_star(double X[NDIM], struct GRMHD *modvar) {
     double rc = sqrt(xc * xc + yc * yc);
 
     if (r > RT_OUTER_CUTOFF){
-        (*modvar).n_e = 0;
         return 0;
     }
 

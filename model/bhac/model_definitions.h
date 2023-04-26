@@ -52,6 +52,7 @@ typedef struct GRMHD {
     double rho;
     double pp;
     double gamma_rel;
+    double lfac;
 } GRMHD;
 
 typedef struct block {

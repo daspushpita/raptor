@@ -377,51 +377,51 @@ void KS_to_CKS_u(double *KScoords, double *CKScoords) {
 
 // Adding transformations for BL to Cartesian Schwarzschild (CSS) and back ///
 
-void BL_to_CSS(double *X_BL_u, double *X_CSS_u) {
+void BL_to_CSS(double *X_BL_u, double *X_CSS_u, double t_init) {
 
     X_CSS_u[0] = X_BL_u[0];
 
-    double r = (X_BL_u[1]);
-    X_CSS_u[1] = r * cos(X_BL_u[3])* sin(X_BL_u[2]);
-    X_CSS_u[2] = r * sin(X_BL_u[3]) * sin(X_BL_u[2]);
+    double r = X_BL_u[1];
+    X_CSS_u[1] = r * cos(X_BL_u[3] - omega * t_init)* sin(X_BL_u[2]);
+    X_CSS_u[2] = r * sin(X_BL_u[3] - omega * t_init) * sin(X_BL_u[2]);
     X_CSS_u[3] = r * cos(X_BL_u[2]);
 }
 
-void CSS_to_BL(double *X_CSS_u, double *X_BL_u) {
+void CSS_to_BL(double *X_CSS_u, double *X_BL_u, double t_init) {
 
     double r = get_r(X_CSS_u);
 
     X_BL_u[0] = X_CSS_u[0];
     X_BL_u[1] = (r);
     X_BL_u[2] = acos(X_CSS_u[3] / r);
-    X_BL_u[3] = atan2(r * X_CSS_u[2], X_CSS_u[1]);
+    X_BL_u[3] = atan2(r * X_CSS_u[2], X_CSS_u[1]) + omega * t_init;
     
 }
 
 // Transform a contravariant vector from BL to CSS coordinates
-void BL_to_CSS_u(double *BLphoton_u, double *CSSphoton_u) {
+void BL_to_CSS_u(double *BLphoton_u, double *CSSphoton_u, double t_init) {
     double trans[4][4];
 
-    LOOP_ij trans[i][j] = 0;
     double X_BL_u[4], U_BL[4];
     double X_CSS_u[4], U_CSS[4];
+
     LOOP_i X_BL_u[i] = BLphoton_u[i];
     LOOP_i U_BL[i] = BLphoton_u[i + 4];
     LOOP_i U_CSS[i] = 0;
+    
+    LOOP_ij trans[i][j] = 0.;
+    LOOP_i trans[i][i] = 1.;
 
-    double r = (X_BL_u[1]);
-    double th = X_BL_u[2];
-    double phi = X_BL_u[3];
+    double r = X_BL_u[1];
 
-    BL_to_CSS(X_BL_u, X_CSS_u);
+    BL_to_CSS(X_BL_u, X_CSS_u, t_init);
 
     double x = X_CSS_u[1];
     double y = X_CSS_u[2];
     double z = X_CSS_u[3];
     double small  = 1.2E-30;
-    double ter0 = sqrt(x * x + y * y) + small;
+    double ter0 = sqrt(x * x + y * y + small);
 
-    trans[0][0] = 1;
     trans[1][0] = y * omega;
     trans[1][1] = x/r;
     trans[1][2] = x * z/ter0;
@@ -448,7 +448,7 @@ void BL_to_CSS_u(double *BLphoton_u, double *CSSphoton_u) {
 }
 
 // Transform a contravariant vector from CSS to BL coordinates
-void CSS_to_BL_u(double *CSSphoton_u, double *BLphoton_u) {
+void CSS_to_BL_u(double *CSSphoton_u, double *BLphoton_u, double t_init) {
     double trans[4][4];
 
     LOOP_ij trans[i][j] = 0;
@@ -462,7 +462,7 @@ void CSS_to_BL_u(double *CSSphoton_u, double *BLphoton_u) {
     double y = X_CSS_u[2];
     double z = X_CSS_u[3];
 
-    CSS_to_BL(X_CSS_u, X_BL_u);
+    CSS_to_BL(X_CSS_u, X_BL_u, t_init);
 
     double r = (X_BL_u[1]);
     double th = X_BL_u[2];
@@ -481,6 +481,57 @@ void CSS_to_BL_u(double *CSSphoton_u, double *BLphoton_u) {
     trans[2][3] = -ter0/(r * r);
 
     trans[3][0] = omega;
+    trans[3][1] = -y/(ter0 * ter0);
+    trans[3][2] = x/(ter0 * ter0);
+
+    for (int i = 0; i < 4; i++) {
+        for (int j = 0; j < 4; j++) {
+            U_BL[i] += trans[i][j] * U_CSS[j];
+        }
+    }
+
+    LOOP_i {
+        BLphoton_u[i] = X_BL_u[i];
+        BLphoton_u[i + 4] = U_BL[i];
+    }
+}
+
+// Transform a contravariant vector from CSS to BL coordinates
+void CSS_to_BLco_u(double *CSSphoton_u, double *BLphoton_u) {
+    double trans[4][4];
+
+    LOOP_ij trans[i][j] = 0;
+    double X_CSS_u[4], U_CSS[4];
+    double X_BL_u[4], U_BL[4];
+    LOOP_i X_CSS_u[i] = CSSphoton_u[i];
+    LOOP_i U_CSS[i] = CSSphoton_u[i + 4];
+    LOOP_i U_BL[i] = 0;
+
+    double x = X_CSS_u[1];
+    double y = X_CSS_u[2];
+    double z = X_CSS_u[3];
+
+    double r = get_r(X_CSS_u);
+
+    X_BL_u[0] = X_CSS_u[0];
+    X_BL_u[1] = (r);
+    X_BL_u[2] = acos(X_CSS_u[3] / r);
+    X_BL_u[3] = atan2(r * X_CSS_u[2], X_CSS_u[1]);
+
+    double small  = 1.2E-30;
+    double ter0 = sqrt(x * x + y * y + small);
+
+
+    trans[0][0] = 1;
+    trans[1][1] = x/r;
+    trans[1][2] = y/r;
+    trans[1][3] = z/r;
+
+    trans[2][1] = x * z/(r * r * ter0);
+    trans[2][2] = y * z/(r * r * ter0);
+    trans[2][3] = -ter0/(r * r);
+
+    trans[3][0] = 0.;
     trans[3][1] = -y/(ter0 * ter0);
     trans[3][2] = x/(ter0 * ter0);
 

@@ -340,14 +340,15 @@ void write_ray_output(double X_u[4], double k_u[4], int block, int pixel) {
     rayfile = fopen(fname, "a");
 
     fprintf(rayfile, "%e %e %e %e %e ", X_u[0], X_u[1], X_u[2], X_u[3], r_current);
-    fprintf(rayfile, "%e %e %e %e\n", k_u[0], k_u[1], k_u[2], k_u[3]);
+    fprintf(rayfile, "%e %e %e %e %e\n", k_u[0], k_u[1], k_u[2], k_u[3], inner_product(X_u, k_u, k_u));
 
     fclose(rayfile);
 }
 
 void write_starBB_output(double X_u[4], double IQUV[num_frequencies][4], 
-                        int block, int pixel, double frequencies[num_frequencies],
-                        double phi) {
+                        int block, int pixel, double alpha, double beta,
+                        double frequencies[num_frequencies],
+                        double nu_plasma[num_frequencies], double phi) {
 
     char fname[20];
     FILE *starBB;
@@ -355,7 +356,7 @@ void write_starBB_output(double X_u[4], double IQUV[num_frequencies][4],
     struct stat st = {0};
     double r_current = get_r(X_u);
 
-    int phi_tot = 50;
+    int phi_tot = 256;
     double dphi = 2. * M_PI/(double)phi_tot;
     int nphi = phi/dphi;
 
@@ -369,7 +370,7 @@ void write_starBB_output(double X_u[4], double IQUV[num_frequencies][4],
         starBB = fopen(fname, "w");
 
         fprintf(starBB, "x_0 x_1 x_2 x_3 radius ");
-        fprintf(starBB, "Intensity phi\n");
+        fprintf(starBB, "Intensity Frequency phi alpha beta\n");
 
         fclose(starBB);
     }
@@ -377,7 +378,7 @@ void write_starBB_output(double X_u[4], double IQUV[num_frequencies][4],
     starBB = fopen(fname, "a");
 
     fprintf(starBB, "%e %e %e %e %e ", X_u[0], X_u[1], X_u[2], X_u[3], r_current);
-    fprintf(starBB, "%e %e\n", IQUV[0][0] * pow(frequencies[0], 3.), phi); // At the moment only works for one frequency
+    fprintf(starBB, "%e %e %e %e %e\n", IQUV[0][0] * pow(frequencies[0], 3.), nu_plasma[0], phi, alpha, beta); // At the moment only works for one frequency
 
     fclose(starBB);
 }
@@ -407,7 +408,7 @@ void write_starBB_spectrum(double energy_spectrum[num_frequencies][nspec],
     }
 
     starBBspec = fopen(fname, "a");
-    fprintf(starBBspec, "%e %e %e %e\n ", energy_spectrum[freq][0], phi, frequencies[freq], nu_plasma[freq]);
+    fprintf(starBBspec, "%e %e %e %e\n ", JANSKY_FACTOR * energy_spectrum[freq][0], phi, frequencies[freq], nu_plasma[freq]);
     fclose(starBBspec);
 }
 

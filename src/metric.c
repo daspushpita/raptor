@@ -1260,6 +1260,19 @@ void initialize_photon(double alpha, double beta, double photon_u[8],
     photon_u[5] = k_u[1];
     photon_u[6] = k_u[2];
     photon_u[7] = k_u[3];
+
+    //#if (DEBUG)
+    //    double g_uu_11 = (1. - 2./rcam);
+    //    k_d[0] = k_u[0] * g_uu_00;
+
+    //    k_d[1] = k_u[1] * g_uu_11;
+    //    k_d[2] = k_u[2] * g_uu_22;
+    //    k_d[3] = k_u[3] * g_uu_33;
+
+    //    double norm = k_u[0] * k_d[0] + k_u[1] * k_d[1] + k_u[2] * k_d[2] + k_u[3] * k_d[3];
+    //    printf("\n INITIAL NORM = %+.15e", norm);
+    //#endif
+
 // Convert k_u to the coordinate system that is currently used
 #if (metric == KS || metric == MKS || metric == MKSHARM || metric == MKSN ||   \
      metric == CKS || metric == MKSBHAC)
@@ -1274,11 +1287,22 @@ void initialize_photon(double alpha, double beta, double photon_u[8],
 #else if (metric == CSS)
 
     double CSSphoton_u[8];
-    BL_to_CSS_u(photon_u, CSSphoton_u);
+
+    BL_to_CSS_u(photon_u, CSSphoton_u, t_init);
     LOOP_i {
         photon_u[i] = CSSphoton_u[i];
         photon_u[i + 4] = CSSphoton_u[i + 4];
     }
+
+    //#if (DEBUG)
+    //double X_u[4];
+    //LOOP_i {
+    //    X_u[i] = photon_u[i];
+    //    k_u[i] = photon_u[i + 4];
+    //}
+    //    fprintf(stderr,"NORM AFTER TRANSFORMATION = %+.15e\n", inner_product(X_u, k_u, k_u));
+    //#endif
+
 #endif
 
 #if (metric == MKSHARM || metric == MKSBHAC)
@@ -1305,7 +1329,7 @@ void initialize_photon(double alpha, double beta, double photon_u[8],
     KS_to_CKS_u(photon_u_KS, photon_u);
 
 #endif
-    // printf("\n INITIAL NORM = %+.15e", inner_product(Xcam_u, k_u, k_u));
+    //printf("\n INITIAL NORM = %+.15e", inner_product(Xcam_u, k_u, k_u));
 }
 
 // Initialize photon using a simple Euclidean virtual camera consisting of eye

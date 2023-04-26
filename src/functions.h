@@ -66,16 +66,18 @@ void CKS_to_KS(double *X_CKS_u, double *X_KS_u);
 void KS_to_CKS_u(double *KScoords, double *CKScoords);
 
 // Convert BL to CSS coordinates///////////////
-void BL_to_CSS(double *X_BL_u, double *X_CSS_u);
+void BL_to_CSS(double *X_BL_u, double *X_CSS_u, double t_init);
 
 // Convert CSS to BL coordinates
-void CSS_to_BL(double *X_CSS_u, double *X_BL_u);
+void CSS_to_BL(double *X_CSS_u, double *X_BL_u, double t_init);
 
 // Transform a contravariant vector from BL to CSS coordinates
-void BL_to_CSS_u(double *BLphoton_u, double *CSSphoton_u);
+void BL_to_CSS_u(double *BLphoton_u, double *CSSphoton_u, double t_init);
 
 // Transform a contravariant vector from CSS to BL coordinates/////////////
-void CSS_to_BL_u(double *CSSphoton_u, double *BLphoton_u);
+void CSS_to_BL_u(double *CSSphoton_u, double *BLphoton_u, double t_init);
+
+void CSS_to_BLco_u(double *CSSphoton_u, double *BLphoton_u);
 
 // Return the photon frequency in the co-moving frame of the plasma
 double freq_in_plasma_frame(double Uplasma_u[4], double k_d[4]);
@@ -130,7 +132,9 @@ double star_BB_emission(double *lightpath, int steps,
                                       double *frequency,
                                       double IQUV[num_frequencies][4],
                                       double tau[num_frequencies],
-                                      int block, int pixel,
+                                      double geo_fac[num_frequencies][4],
+                                      int block, int pixel, double beta,
+                                      double alpha,
                                       double nu_plasma[num_frequencies],
                                       double phi);
 // METRIC.C
@@ -236,8 +240,9 @@ double BB_spectrum(double nu, double Temperature);
 //This one takes Temperature and returns I/nu^3
 
 //Compute the Doppler Boost Factor (See Juri Poutanen and Andrei M. Beloborodov 2006)
-double doppler_factor(double beta, double *frequency, 
-                        double X_u[4], double phi, double lfac);
+double doppler_factor(double beta, double frequency, 
+                        double X_u[4], double phi, double lfac, 
+                        double *cos_alpha, double *cos_psi, double *dopp_factor);
 
 // Perform radiative transfer along the ray stored in "lightpath"
 double radiative_transfer(double *lightpath, int steps, double frequency);
@@ -367,8 +372,9 @@ void write_ray_output(double X_u[], double k_u[], int block, int pixel);
 
 //Adding the output for Black Body emission from the star :-D//////////
 void write_starBB_output(double X_u[], double IQUV[num_frequencies][4], 
-                        int block, int pixel, double frequencies[num_frequencies],
-                        double phi);
+                        int block, int pixel, double alpha, double beta,
+                        double frequencies[num_frequencies],
+                        double nu_plasma[num_frequencies], double phi);
 
 //Plot the pulses
 void write_starBB_spectrum(double spectrum[num_frequencies][nspec],

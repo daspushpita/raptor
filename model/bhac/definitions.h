@@ -64,7 +64,7 @@ typedef struct Camera {
     double pdf[tot_pixels][num_frequencies];    // intensity
     double avg[tot_pixels][num_frequencies];    // intensity
     #ifdef PPM
-        double geo_fac[tot_pixels][num_frequencies]; // intensity
+        double geo_fac[tot_pixels][num_frequencies][3]; // intensity
     #endif
     double alpha[tot_pixels];                    // impact parameter
     double beta[tot_pixels];                     // impact parameter

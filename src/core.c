@@ -130,7 +130,10 @@ void calculate_image_block(struct Camera *intensityfield,
         star_BB_emission(lightpath2, steps, frequencies,
                         (*intensityfield).IQUV[pixel],
                         &(*intensityfield).tau[pixel],
-                        block, pixel, nu_plasma, phi);
+                        (*intensityfield).geo_fac[pixel],
+                        block, pixel,(*intensityfield).beta[pixel],
+                        (*intensityfield).alpha[pixel],
+                        nu_plasma, phi);
         for (int f = 0; f < num_frequencies; f++) {
             (*intensityfield).IQUV[pixel][f][0] *= pow(frequencies[f], 3.);
         }
@@ -194,7 +197,8 @@ void compute_spec(struct Camera *intensityfield,
 
 #else
                 #if (PPM)
-                    energy_spectrum[freq][0] += (intensityfield)[block].IQUV[pixel][freq][0];
+                    energy_spectrum[freq][0] += (intensityfield)[block].IQUV[pixel][freq][0] * 
+                                                dA;
                 #else
                     energy_spectrum[freq][0] +=
                         (intensityfield)[block].IQUV[pixel][freq][0] * dA;
