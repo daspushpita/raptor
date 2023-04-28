@@ -93,8 +93,8 @@ int main(int argc, char *argv[]) {
     ////////////////////
 
 #if (PPM)
-    int nphi = 0;
-    int phi_tot = 1; //256;
+    int nphi;
+    int phi_tot = 50;
     double dphi = 2. * M_PI/(double)phi_tot;
 
     fprintf(stderr, "\nNumber of frequencies to compute: %d\n",
@@ -176,16 +176,16 @@ int main(int argc, char *argv[]) {
             write_starBB_spectrum(energy_spectrum, frequencies, nu_plasma, f, phi); 
         }
 
-        if (phi_tot == 1){
+        //if (phi_tot == 1){
             // WRITE OUTPUT FILES
             /////////////////////
 
-            output_files(intensityfield, energy_spectrum, frequencies);
+        output_files(intensityfield, energy_spectrum, frequencies, nphi);
 
-            #if (UNIF)
-                write_uniform_camera(intensityfield, frequencies[0], 0);
-            #endif
-        }
+        #if (UNIF)
+            write_uniform_camera(intensityfield, frequencies[0], 0);
+        #endif
+        //}
         free(intensityfield);
         // FREE ALLOCATED POINTERS
         //////////////////////////
@@ -264,7 +264,7 @@ int main(int argc, char *argv[]) {
     // WRITE OUTPUT FILES
     /////////////////////
 
-    output_files(intensityfield, energy_spectrum, frequencies);
+    output_files(intensityfield, energy_spectrum, frequencies, nphi);
 
     #if (UNIF)
         write_uniform_camera(intensityfield, frequencies[0], 0);

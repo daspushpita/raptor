@@ -16,7 +16,7 @@
 
 void output_files(struct Camera *intensityfield,
                   double energy_spectrum[num_frequencies][nspec],
-                  double frequencies[num_frequencies]) {
+                  double frequencies[num_frequencies], double phi) {
     struct stat st = {0};
     char spec_folder[64] = "output";
 
@@ -26,8 +26,8 @@ void output_files(struct Camera *intensityfield,
 
 #if (SPECFILE)
     char spec_filename[256] = "";
-    sprintf(spec_filename, "%s/spectrum_%d_%.02lf.dat", spec_folder,
-            (int)TIME_INIT, INCLINATION);
+    sprintf(spec_filename, "%s/spectrum_%d_%.02lf_%d.dat", spec_folder,
+            (int)TIME_INIT, INCLINATION, nphi);
     FILE *specfile = fopen(spec_filename, "w");
 #endif
 
@@ -36,8 +36,8 @@ void output_files(struct Camera *intensityfield,
 
 #if (IMGFILE)
         char hdf5_filename[512] = "";
-        sprintf(hdf5_filename, "%s/img_data_%d.h5", spec_folder,
-                (int)TIME_INIT);
+        sprintf(hdf5_filename, "%s/img_data_%d_%d.h5", spec_folder,
+                (int)TIME_INIT,nphi);
         write_image_hdf5(hdf5_filename, intensityfield, frequencies,
                          JANSKY_FACTOR);
 #endif
@@ -356,7 +356,7 @@ void write_starBB_output(double X_u[4], double IQUV[num_frequencies][4],
     struct stat st = {0};
     double r_current = get_r(X_u);
 
-    int phi_tot = 256;
+    int phi_tot = 50;
     double dphi = 2. * M_PI/(double)phi_tot;
     int nphi = phi/dphi;
 

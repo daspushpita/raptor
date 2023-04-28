@@ -112,7 +112,6 @@ void calculate_image_block(struct Camera *intensityfield,
     schedule(static, 1)
     for (int pixel = 0; pixel < tot_pixels; pixel++) {
         int steps = 0;
-        fprintf(stderr,"alpha, beta %e %e\n", (*intensityfield).alpha[pixel], (*intensityfield).beta[pixel]);
 
         double *lightpath2 = malloc(9 * max_steps * sizeof(double));
 
