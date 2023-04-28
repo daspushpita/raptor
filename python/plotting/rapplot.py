@@ -14,8 +14,8 @@ KPC = 3.086e21
 SEC_IN_DAY = 86400.
 MAS_IN_DEG = 206264.806*1000.
 
-def read_data_id(folder,ind):
-    file_name = folder+'/img_data_%d.h5'%ind
+def read_data_id(folder,ind,nphi):
+    file_name = folder+'/img_data_%d'%ind + '_%d.h5'%nphi
     print("Reading keys from: ", file_name)
     images = h5py.File(file_name,'r')
     keys = [key for key in images.keys()]
@@ -23,9 +23,9 @@ def read_data_id(folder,ind):
     images.close()
     return keys
 
-def read_data(folder,ind,data_id):
+def read_data(folder,ind,data_id,nphi):
 
-    file_name = folder+'/img_data_%d.h5'%ind
+    file_name = folder+'/img_data_%d'%ind + '_%d.h5'%nphi
 
     print("Reading in: ", file_name)
 
@@ -108,7 +108,7 @@ def plot_data_RM(image,min,max,ind_1,ind_2,data_id,lam1,lam2,fig,ax,halfrange=10
     for i in range(0,len(image[data_id[0]])):
         pixels=int(np.sqrt(len(image[data_id[0]][i])))
 
-       	array_I_1=((np.reshape(image[data_id[ind_1]][i],(pixels,pixels))))
+        array_I_1=((np.reshape(image[data_id[ind_1]][i],(pixels,pixels))))
         array_Q_1=((np.reshape(image[data_id[ind_1 + 20]][i],(pixels,pixels))))
         array_U_1=((np.reshape(image[data_id[ind_1+ 40]][i],(pixels,pixels))))
 
