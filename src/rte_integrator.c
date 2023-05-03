@@ -157,7 +157,7 @@ double BB_spectrum(double nu, double Temperature){
 }
 
 double doppler_factor(double beta, double frequency, 
-                        double X_u[4], double phi, double lfac,
+                        double X_u[4], double phi_global, double lfac,
                         double *cos_alpha, double *cos_psi, double *dopp_factor){
 
     double sin_alpha, theta1, delta_1;
@@ -169,33 +169,28 @@ double doppler_factor(double beta, double frequency,
 
     theta1 =  X_u[2];
     *cos_psi = cos(INCLINATION / 180. * M_PI) * cos(theta1) + sin(INCLINATION / 180. * M_PI) *
-                sin(theta1) * cos(phi);
+                sin(theta1) * cos(phi_global);
     
     double sin_psi = sqrt(1. - *cos_psi * *cos_psi);
-    double cos_zeta = - (sin_alpha / sin_psi) * sin(INCLINATION / 180. * M_PI) * sin(phi);
+    double cos_zeta = - (sin_alpha / sin_psi) * sin(INCLINATION / 180. * M_PI) * sin(phi_global);
     double beta_1 = sqrt(1. - 1./lfac);
     delta_1 = 1./ (lfac * (1. - beta_1 * cos_zeta));
     *dopp_factor = delta_1;
     return 1;
 }
 
-double star_BB_emission(double *lightpath, int steps,
+void star_BB_emission(double *lightpath, int steps,
                         double *frequency, double IQUV[num_frequencies][4],
-                        double tau[num_frequencies], int block, int pixel, 
-                        double beta, double alpha,
-                        double nu_plasma[num_frequencies], double phi) {
+                        double alpha, double beta, 
+                        int block, int pixel, double phi_global) {
 
     int path_counter;
 
     double X_u[4], k_d[4], k_u[4], k_u_s[4], photon_CSSuu[8], photon_BLuu[8], uBL_u[4], uBL_d[4];
-    double TMArt, Temp, Intensity_BB;
+    double TMArt, Temp;
     double nu_p;
 
     double sigmaa = 5.6704e-5; //Stefan Boltzmann Constant in cgs units  
-
-    double Rg = GGRAV * MBH / SPEED_OF_LIGHT / SPEED_OF_LIGHT; // Rg in cm
-
-    double dtau_old = 0;
 
     struct GRMHD modvar;
 
@@ -279,17 +274,12 @@ double star_BB_emission(double *lightpath, int steps,
             // Compute the photon frequency in the plasma frame:
             nu_p = freq_in_plasma_frame(modvar.U_u, k_d);
 
-
-            tau[f] += 0.;
-
             IQUV[f][0] = BB_spectrum(nu_p, Temp)/(nu_p * nu_p * nu_p);
 
-            nu_plasma[f] = nu_p;
-            write_starBB_output(X_u, IQUV, block, pixel, alpha, beta, frequency, nu_plasma, phi);
+            write_starBB_output(X_u, IQUV, block, pixel, alpha, beta, frequency, phi_global);
 
         }
     }
     #endif
-    return 1;
 }
 

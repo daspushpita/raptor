@@ -105,8 +105,7 @@ void read_model(char *argv[]) {
 // For a single block this function will iterate over the pixels and call
 // geodesic integrations as well as radiation transfer
 void calculate_image_block(struct Camera *intensityfield,
-                           double frequencies[num_frequencies], int block, double phi,
-                           double nu_plasma[num_frequencies]) {
+                           double frequencies[num_frequencies], int block, double phi_global) {
 
 #pragma omp parallel for shared(frequencies, intensityfield, p)                \
     schedule(static, 1)
@@ -125,23 +124,22 @@ void calculate_image_block(struct Camera *intensityfield,
 
         integrate_geodesic((*intensityfield).alpha[pixel],
                             (*intensityfield).beta[pixel], lightpath2, &steps,
-                            CUTOFF_INNER, block, pixel, phi);
+                            CUTOFF_INNER, block, pixel, phi_global);
         
         star_BB_emission(lightpath2, steps, frequencies,
                         (*intensityfield).IQUV[pixel],
-                        &(*intensityfield).tau[pixel],
-                        block, pixel,(*intensityfield).beta[pixel],
                         (*intensityfield).alpha[pixel],
-                        nu_plasma, phi);
+                        (*intensityfield).beta[pixel], 
+                        block, pixel, phi_global);
         for (int f = 0; f < num_frequencies; f++) {
             (*intensityfield).IQUV[pixel][f][0] *= pow(frequencies[f], 3.);
         }
 #else
-    double phi = 0.;
+    double phi_global = 0.;
     // INTEGRATE THIS PIXEL'S GEODESIC
     integrate_geodesic((*intensityfield).alpha[pixel],
                         (*intensityfield).beta[pixel], lightpath2, &steps,
-                        CUTOFF_INNER, block, pixel, phi);
+                        CUTOFF_INNER, block, pixel, phi_global);
 
     #if (POL)
         for (int f = 0; f < num_frequencies; f++) {

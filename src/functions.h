@@ -66,16 +66,16 @@ void CKS_to_KS(double *X_CKS_u, double *X_KS_u);
 void KS_to_CKS_u(double *KScoords, double *CKScoords);
 
 // Convert BL to CSS coordinates///////////////
-void BL_to_CSS(double *X_BL_u, double *X_CSS_u, double t_init);
+void BL_to_CSS(double *X_BL_u, double *X_CSS_u);
 
 // Convert CSS to BL coordinates
-void CSS_to_BL(double *X_CSS_u, double *X_BL_u, double t_init);
+void CSS_to_BL(double *X_CSS_u, double *X_BL_u);
 
 // Transform a contravariant vector from BL to CSS coordinates
-void BL_to_CSS_u(double *BLphoton_u, double *CSSphoton_u, double t_init);
+void BL_to_CSS_u(double *BLphoton_u, double *CSSphoton_u);
 
 // Transform a contravariant vector from CSS to BL coordinates/////////////
-void CSS_to_BL_u(double *CSSphoton_u, double *BLphoton_u, double t_init);
+void CSS_to_BL_u(double *CSSphoton_u, double *BLphoton_u);
 
 void CSS_to_BLco_u(double *CSSphoton_u, double *BLphoton_u);
 
@@ -116,7 +116,7 @@ void f_geodesic(double *y, double *fvector);
 // in lightpath
 void integrate_geodesic(double alpha, double beta, double *lightpath,
                         int *steps, double cutoff_inner,
-                        int block, int pixel, double phi);
+                        int block, int pixel, double phi_global);
 
 void radiative_transfer_polarized(double *lightpath, int steps,
                                   double frequency, double *f_x, double *f_y,
@@ -128,14 +128,12 @@ double radiative_transfer_unpolarized(double *lightpath, int steps,
                                       double IQUV[num_frequencies][4],
                                       double tau[num_frequencies]);
 
-double star_BB_emission(double *lightpath, int steps,
-                                      double *frequency,
-                                      double IQUV[num_frequencies][4],
-                                      double tau[num_frequencies],
-                                      int block, int pixel, double beta,
-                                      double alpha,
-                                      double nu_plasma[num_frequencies],
-                                      double phi);
+void star_BB_emission(double *lightpath, int steps,
+                                    double *frequency,
+                                    double IQUV[num_frequencies][4],
+                                    double alpha, double beta,
+                                    int block, int pixel,
+                                    double phi_global);
 // METRIC.C
 ///////////
 
@@ -155,7 +153,7 @@ void connection_num_udd(double X_u[4], double gamma_udd[4][4][4]);
 void connection_udd(double X_u[4], double gamma_udd[4][4][4]);
 
 // This function initializes a single 'superphoton' or light ray.
-void initialize_photon(double alpha, double beta, double k_u[4], double t_init, double phi);
+void initialize_photon(double alpha, double beta, double k_u[4], double t_init, double phi_global);
 
 // Transformation functions
 double Xg2_approx_rand(double Xr2);
@@ -240,7 +238,7 @@ double BB_spectrum(double nu, double Temperature);
 
 //Compute the Doppler Boost Factor (See Juri Poutanen and Andrei M. Beloborodov 2006)
 double doppler_factor(double beta, double frequency, 
-                        double X_u[4], double phi, double lfac, 
+                        double X_u[4], double phi_global, double lfac, 
                         double *cos_alpha, double *cos_psi, double *dopp_factor);
 
 // Perform radiative transfer along the ray stored in "lightpath"
@@ -373,19 +371,18 @@ void write_ray_output(double X_u[], double k_u[], int block, int pixel);
 void write_starBB_output(double X_u[], double IQUV[num_frequencies][4], 
                         int block, int pixel, double alpha, double beta,
                         double frequencies[num_frequencies],
-                        double nu_plasma[num_frequencies], double phi);
+                        double phi_global);
 
 //Plot the pulses
 void write_starBB_spectrum(double spectrum[num_frequencies][nspec],
                             double frequencies[num_frequencies], 
-                            double nu_plasma[num_frequencies], int freq, double phi);
+                            int freq, double phi_global);
 
 ///////////////////////////////////////////////////////////////////////////////////
 // Integrate null geodesics, perform radiative transfer calculations, and
 // compute the image.
 void calculate_image_block(struct Camera *intensityfield,
-                           double frequencies[num_frequencies], int block, double phi,
-                           double nu_plasma[num_frequencies]);
+                           double frequencies[num_frequencies], int block, double phi_global);
 /// CAMERA.C
 void init_camera(struct Camera **intensityfield);
 

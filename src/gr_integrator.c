@@ -333,16 +333,16 @@ void f_geodesic(double *y, double *fvector) {
 // Integrate the null geodesic defined by "photon_u"
 void integrate_geodesic(double alpha, double beta, double *lightpath,
                         int *steps, double cutoff_inner,
-                        int block, int pixel, double phi) {
+                        int block, int pixel, double phi_global) {
     int q;
     double t_init = 0.; //10160.;
     double dlambda_adaptive = -0.1;
     int theta_turns = 0;
     double thetadot_prev;
-    double X_u[4], k_u[4], k_d[4];
+    double X_u[4], k_u[4];
     double photon_u[8];
     // Create initial ray conditions
-    initialize_photon(alpha, beta, photon_u, t_init, phi);
+    initialize_photon(alpha, beta, photon_u, t_init, phi_global);
     LOOP_i X_u[i] = photon_u[i];
     LOOP_i k_u[i] = photon_u[i+4];
     // Current r-coordinate

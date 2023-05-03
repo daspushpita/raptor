@@ -73,7 +73,7 @@ def plot_data_stokes(image,min,max,stokes_ind,data_id,fig,ax,halfrange=40,mas=1,
         else:
             figure=ax.pcolormesh(alpha,beta,(array/max[stokes_ind]),vmin=-1,vmax=1,cmap=cmap,shading='auto')
 
-    fig.colorbar(figure,label=label,ax=ax)
+    fig.colorbar(figure,label=label,ax=ax,fraction=0.046,pad=0.04)
 
     ax.set_xlim(-halfrange*mas,halfrange*mas)
     ax.set_ylim(-halfrange*mas,halfrange*mas)

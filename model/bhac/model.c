@@ -201,7 +201,6 @@ double get_detgamma(double x, double y, double z) {
     if (isnan(sqrt(detgamma))) {
         double R2 = x * x + y * y + z * z;
         double a2 = a * a;
-        double r = sqrt(R2);
         double r2 = (R2 - a2 + sqrt((R2 - a2) * (R2 - a2) + 4. * a2 * z * z)) * 0.5;
         double r_current = sqrt(r2);
 

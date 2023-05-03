@@ -537,7 +537,6 @@ void connection_num_udd(double X_u[4], double gamma_udd[4][4][4]) {
         }
 
 #if (metric == CKS || metric == CSS)
-        double r = get_r(X_u);
         double fac;
         if (fabs(X_u[i]) > delta_num * 1e-2)
             fac = fabs(X_u[i]);
@@ -1207,10 +1206,10 @@ void connection_udd(double X_u[4], double gamma[4][4][4]) {
 // Then construct k_u using E, L, Q
 // The photons all start at the camera location
 void initialize_photon(double alpha, double beta, double photon_u[8],
-                       double t_init, double phi) {
+                       double t_init, double phi_global) {
 
     double mu0 = cos(INCLINATION / 180. * M_PI);
-    double Xcam_u[4] = {t_init, logscale ? log(rcam) : rcam, acos(mu0), phi};
+    double Xcam_u[4] = {t_init, logscale ? log(rcam) : rcam, acos(mu0), phi_global};
     double En = 1.;
     double E2 = En * En;
     double ll = -alpha * sqrt(1. - mu0 * mu0);
@@ -1284,16 +1283,15 @@ void initialize_photon(double alpha, double beta, double photon_u[8],
         photon_u[i + 4] = KSphoton_u[i + 4];
     }
 
-#else if (metric == CSS)
+#elif (metric == CSS)
 
     double CSSphoton_u[8];
 
-    BL_to_CSS_u(photon_u, CSSphoton_u, t_init);
+    BL_to_CSS_u(photon_u, CSSphoton_u);
     LOOP_i {
         photon_u[i] = CSSphoton_u[i];
         photon_u[i + 4] = CSSphoton_u[i + 4];
     }
-
     //#if (DEBUG)
     //double X_u[4];
     //LOOP_i {

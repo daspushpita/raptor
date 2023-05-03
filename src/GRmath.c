@@ -377,29 +377,29 @@ void KS_to_CKS_u(double *KScoords, double *CKScoords) {
 
 // Adding transformations for BL to Cartesian Schwarzschild (CSS) and back ///
 
-void BL_to_CSS(double *X_BL_u, double *X_CSS_u, double t_init) {
+void BL_to_CSS(double *X_BL_u, double *X_CSS_u) {
 
     X_CSS_u[0] = X_BL_u[0];
 
     double r = X_BL_u[1];
-    X_CSS_u[1] = r * cos(X_BL_u[3] - omega * t_init)* sin(X_BL_u[2]);
-    X_CSS_u[2] = r * sin(X_BL_u[3] - omega * t_init) * sin(X_BL_u[2]);
+    X_CSS_u[1] = r * cos(X_BL_u[3])* sin(X_BL_u[2]);
+    X_CSS_u[2] = r * sin(X_BL_u[3]) * sin(X_BL_u[2]);
     X_CSS_u[3] = r * cos(X_BL_u[2]);
 }
 
-void CSS_to_BL(double *X_CSS_u, double *X_BL_u, double t_init) {
+void CSS_to_BL(double *X_CSS_u, double *X_BL_u) {
 
     double r = get_r(X_CSS_u);
 
     X_BL_u[0] = X_CSS_u[0];
     X_BL_u[1] = (r);
     X_BL_u[2] = acos(X_CSS_u[3] / r);
-    X_BL_u[3] = atan2(r * X_CSS_u[2], X_CSS_u[1]) + omega * t_init;
+    X_BL_u[3] = atan2(X_CSS_u[2], X_CSS_u[1]);
     
 }
 
 // Transform a contravariant vector from BL to CSS coordinates
-void BL_to_CSS_u(double *BLphoton_u, double *CSSphoton_u, double t_init) {
+void BL_to_CSS_u(double *BLphoton_u, double *CSSphoton_u) {
     double trans[4][4];
 
     double X_BL_u[4], U_BL[4];
@@ -414,13 +414,13 @@ void BL_to_CSS_u(double *BLphoton_u, double *CSSphoton_u, double t_init) {
 
     double r = X_BL_u[1];
 
-    BL_to_CSS(X_BL_u, X_CSS_u, t_init);
+    BL_to_CSS(X_BL_u, X_CSS_u);
 
     double x = X_CSS_u[1];
     double y = X_CSS_u[2];
     double z = X_CSS_u[3];
     double small  = 1.2E-30;
-    double ter0 = sqrt(x * x + y * y + small);
+    double ter0 = sqrt(r * r - z * z) + small;
 
     trans[1][0] = y * omega;
     trans[1][1] = x/r;
@@ -448,7 +448,7 @@ void BL_to_CSS_u(double *BLphoton_u, double *CSSphoton_u, double t_init) {
 }
 
 // Transform a contravariant vector from CSS to BL coordinates
-void CSS_to_BL_u(double *CSSphoton_u, double *BLphoton_u, double t_init) {
+void CSS_to_BL_u(double *CSSphoton_u, double *BLphoton_u) {
     double trans[4][4];
 
     LOOP_ij trans[i][j] = 0;
@@ -462,13 +462,11 @@ void CSS_to_BL_u(double *CSSphoton_u, double *BLphoton_u, double t_init) {
     double y = X_CSS_u[2];
     double z = X_CSS_u[3];
 
-    CSS_to_BL(X_CSS_u, X_BL_u, t_init);
+    CSS_to_BL(X_CSS_u, X_BL_u);
 
     double r = (X_BL_u[1]);
-    double th = X_BL_u[2];
-    double phi = X_BL_u[3];
     double small  = 1.2E-30;
-    double ter0 = sqrt(x * x + y * y) + small;
+    double ter0 = sqrt(r * r - z * z) + small;
 
 
     trans[0][0] = 1;
@@ -519,7 +517,7 @@ void CSS_to_BLco_u(double *CSSphoton_u, double *BLphoton_u) {
     X_BL_u[3] = atan2(r * X_CSS_u[2], X_CSS_u[1]);
 
     double small  = 1.2E-30;
-    double ter0 = sqrt(x * x + y * y + small);
+    double ter0 = sqrt(r * r - z * z) + small;
 
 
     trans[0][0] = 1;
