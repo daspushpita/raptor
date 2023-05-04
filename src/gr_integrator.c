@@ -335,7 +335,7 @@ void integrate_geodesic(double alpha, double beta, double *lightpath,
                         int *steps, double cutoff_inner,
                         int block, int pixel, double phi_global) {
     int q;
-    double t_init = 0.; //10160.;
+    double t_init = 10160.;
     double dlambda_adaptive = -0.1;
     int theta_turns = 0;
     double thetadot_prev;

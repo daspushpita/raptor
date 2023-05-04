@@ -66,18 +66,21 @@ void CKS_to_KS(double *X_CKS_u, double *X_KS_u);
 void KS_to_CKS_u(double *KScoords, double *CKScoords);
 
 // Convert BL to CSS coordinates///////////////
-void BL_to_CSS(double *X_BL_u, double *X_CSS_u);
+void BL_to_CSS(double *X_BL_u, double *X_CSS_u, double t_init);
 
 // Convert CSS to BL coordinates
-void CSS_to_BL(double *X_CSS_u, double *X_BL_u);
+void CSS_to_BL(double *X_CSS_u, double *X_BL_u, double t_init);
 
 // Transform a contravariant vector from BL to CSS coordinates
-void BL_to_CSS_u(double *BLphoton_u, double *CSSphoton_u);
+void BL_to_CSS_u(double *BLphoton_u, double *CSSphoton_u, double t_init);
 
 // Transform a contravariant vector from CSS to BL coordinates/////////////
-void CSS_to_BL_u(double *CSSphoton_u, double *BLphoton_u);
+void CSS_to_BL_u(double *CSSphoton_u, double *BLphoton_u, double t_init);
 
 void CSS_to_BLco_u(double *CSSphoton_u, double *BLphoton_u);
+
+void BL_to_CSSco_u(double *BLphoton_u, double *CSSphoton_u);
+
 
 // Return the photon frequency in the co-moving frame of the plasma
 double freq_in_plasma_frame(double Uplasma_u[4], double k_d[4]);

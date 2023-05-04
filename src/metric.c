@@ -1287,7 +1287,9 @@ void initialize_photon(double alpha, double beta, double photon_u[8],
 
     double CSSphoton_u[8];
 
-    BL_to_CSS_u(photon_u, CSSphoton_u);
+    //BL_to_CSSco_u(photon_u, CSSphoton_u);
+    BL_to_CSS_u(photon_u, CSSphoton_u, t_init);
+
     LOOP_i {
         photon_u[i] = CSSphoton_u[i];
         photon_u[i + 4] = CSSphoton_u[i + 4];

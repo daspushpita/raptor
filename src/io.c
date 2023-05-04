@@ -332,7 +332,7 @@ void write_ray_output(double X_u[4], double k_u[4], int block, int pixel) {
         rayfile = fopen(fname, "w");
 
         fprintf(rayfile, "x_0 x_1 x_2 x_3 radius ");
-        fprintf(rayfile, "k_0 k_1 k_2 k_3\n");
+        fprintf(rayfile, "k_0 k_1 k_2 k_3 Normalize\n");
 
         fclose(rayfile);
     }

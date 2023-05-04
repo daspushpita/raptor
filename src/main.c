@@ -93,8 +93,10 @@ int main(int argc, char *argv[]) {
     ////////////////////
 
 #if (PPM)
-    int nphi;
+    int nphi = 0;
     int phi_tot = 50;
+    double end_phi = M_PI;
+    double phi_global = -M_PI;
     double dphi = 2. * M_PI/(double)phi_tot;
 
     fprintf(stderr, "\nNumber of frequencies to compute: %d\n",
@@ -123,7 +125,7 @@ int main(int argc, char *argv[]) {
 
     fprintf(stderr, "\nStarting ray tracing\n\n");
 
-    for (nphi = 0; nphi < phi_tot; nphi++) { // For all phi...
+    while (phi_global <= end_phi) { // For all phi...
 
         struct Camera *intensityfield;
 
@@ -138,7 +140,6 @@ int main(int argc, char *argv[]) {
                 energy_spectrum[f][s] = 0.;
         }
 
-        double phi_global = nphi * dphi;
         int block = 0;
             
         while (block  < tot_blocks) { // block_total
@@ -184,6 +185,8 @@ int main(int argc, char *argv[]) {
         //////////////////////////
         // FREE ALLOCATED POINTERS
         //////////////////////////
+        phi_global += dphi;
+        nphi += 1;
     }
     fprintf(stderr, "\nThat's all folks!\n");
         
