@@ -357,7 +357,7 @@ void write_starBB_output(double X_u[4], double IQUV[num_frequencies][4],
 
     int phi_tot = 50;
     double dphi = 2. * M_PI/(double)phi_tot;
-    int nphi = abs(phi_global)/dphi;
+    int nphi = phi_global/dphi;
 
     if (stat(star_folder, &st) == -1) {
         mkdir(star_folder, 0700);
