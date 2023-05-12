@@ -400,7 +400,7 @@ void write_starBB_spectrum(double energy_spectrum[num_frequencies][nspec],
     if (stat(fname, &st) == -1) {
         starBBspec = fopen(fname, "w");
 
-        fprintf(starBBspec, "Flux Phi frequency\n");
+        fprintf(starBBspec, "#Flux Phi frequency\n");
 
         fclose(starBBspec);
     }

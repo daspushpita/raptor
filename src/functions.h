@@ -81,6 +81,9 @@ void CSS_to_BLco_u(double *CSSphoton_u, double *BLphoton_u);
 
 void BL_to_CSSco_u(double *BLphoton_u, double *CSSphoton_u);
 
+// Transform the stress tensor from CSS to BL coordinates
+void stress_BL(double X_u[4], double TMA_CSS[4][4], double TMA_BL[4][4]);
+
 
 // Return the photon frequency in the co-moving frame of the plasma
 double freq_in_plasma_frame(double Uplasma_u[4], double k_d[4]);

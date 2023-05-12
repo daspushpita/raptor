@@ -193,13 +193,8 @@ void compute_spec(struct Camera *intensityfield,
                 energy_spectrum[freq][3] += S_V * dA;
 
 #else
-                #if (PPM)
-                    energy_spectrum[freq][0] += (intensityfield)[block].IQUV[pixel][freq][0] * 
-                                                dA;
-                #else
-                    energy_spectrum[freq][0] +=
-                        (intensityfield)[block].IQUV[pixel][freq][0] * dA;
-                #endif
+                energy_spectrum[freq][0] +=
+                    (intensityfield)[block].IQUV[pixel][freq][0] * dA;
 #endif
             }
         }

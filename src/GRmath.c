@@ -561,7 +561,7 @@ void CSS_to_BLco_u(double *CSSphoton_u, double *BLphoton_u) {
     X_BL_u[0] = X_CSS_u[0];
     X_BL_u[1] = (r);
     X_BL_u[2] = acos(X_CSS_u[3] / r);
-    X_BL_u[3] = atan2(r * X_CSS_u[2], X_CSS_u[1]);
+    X_BL_u[3] = atan2(X_CSS_u[2], X_CSS_u[1]);
 
     double small  = 1.2E-30;
     double ter0 = sqrt(r * r - z * z) + small;
@@ -591,7 +591,70 @@ void CSS_to_BLco_u(double *CSSphoton_u, double *BLphoton_u) {
         BLphoton_u[i + 4] = U_BL[i];
     }
 }
+// Transform the stress tensor from CSS to BL coordinates
+void stress_BL(double X_u[4], double TMA_CSS[4][4], double TMA_BL[4][4]) {
+    
+    double trans1[4][4];
+    LOOP_ij trans1[i][j] = 0;
 
+    double trans2[4][4];
+    LOOP_ij trans2[i][j] = 0;
+    
+    double tensor_temp[4][4];
+    LOOP_ij tensor_temp[i][j] = 0.;
+
+    double x = X_u[1];
+    double y = X_u[2];
+    double z = X_u[3];
+
+    double r = get_r(X_u);
+
+    double small  = 1.2E-30;
+    double ter0 = sqrt(r * r - z * z) + small;
+
+
+    trans1[0][0] = 1;
+    trans1[1][1] = x/r;
+    trans1[1][2] = y/r;
+    trans1[1][3] = z/r;
+
+    trans1[2][1] = x * z/(r * r * ter0);
+    trans1[2][2] = y * z/(r * r * ter0);
+    trans1[2][3] = -ter0/(r * r);
+
+    trans1[3][0] = 0.;
+    trans1[3][1] = -y/(ter0 * ter0);
+    trans1[3][2] = x/(ter0 * ter0);
+
+    trans2[0][0] = 1;
+    trans2[1][1] = x/r;
+    trans2[1][2] = x * z/ter0;
+    trans2[1][3] = -y;
+
+    trans2[2][1] = y/r;
+    trans2[2][2] = y * z/ter0;
+    trans2[2][3] = x;
+
+    trans2[3][1] = z/r;
+    trans2[3][2] = -ter0;
+
+    for (int i = 0; i < 4; i++) {
+        for (int j = 0; j < 4; j++) {
+            for (int k = 0; k < 4; k++) {
+                tensor_temp[i][j] += TMA_CSS[i][k] * trans2[k][j];
+            }
+        }
+    }
+
+    for (int i = 0; i < 4; i++) {
+        for (int j = 0; j < 4; j++) {
+            for (int k = 0; k < 4; k++) {
+                TMA_BL[i][j] += trans1[i][k] * tensor_temp[k][j];
+            }
+        }
+    }
+
+}
 //////////////////////////////////////////////////////////////////
 // Compute the photon frequency in the plasma frame:
 double freq_in_plasma_frame(double Uplasma_u[4], double k_d[4]) {
