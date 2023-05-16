@@ -1111,9 +1111,10 @@ int get_fluid_params(double X[NDIM], struct GRMHD *modvar) {
     uu = interp_scalar(p[UU][igrid], c, del);
 
 
-    (*modvar).gamma_rel = 5./3.;
-    (*modvar).pp = uu * ((*modvar).gamma_rel - 1.);
-    (*modvar).rho = rho;
+    double gam = neqpar[0];
+    (*modvar).prim_pp = uu * (gam - 1.);
+    (*modvar).prim_rho = rho;
+    (*modvar).gammarel = gam;
 
     (*modvar).n_e = rho * Ne_unit + smalll;
 
@@ -1146,8 +1147,6 @@ int get_fluid_params(double X[NDIM], struct GRMHD *modvar) {
 
     double lfac = sqrt(gVdotgV + 1.);
     
-    (*modvar).lfac = lfac;
-
     V_u[1] = gV_u[1] / lfac;
     V_u[2] = gV_u[2] / lfac;
     V_u[3] = gV_u[3] / lfac;
@@ -1218,7 +1217,6 @@ int get_fluid_params(double X[NDIM], struct GRMHD *modvar) {
         exit(1);
     }
 #endif
-    double gam = neqpar[0];
 
     double beta_trans = 1.0;
 
@@ -1322,10 +1320,12 @@ int get_fluid_params_star(double X[NDIM], struct GRMHD *modvar) {
     rho = interp_scalar(p[KRHO][igrid], c, del);
     uu = interp_scalar(p[UU][igrid], c, del);
 
+    double gam = neqpar[0];
 
-    (*modvar).gamma_rel = 5./3.;
-    (*modvar).pp = uu * ((*modvar).gamma_rel - 1.);
-    (*modvar).rho = rho;
+    (*modvar).prim_pp = uu * (gam - 1.);
+    (*modvar).prim_rho = rho;
+    (*modvar).gammarel = gam;
+
 
 
     (*modvar).n_e = rho * Ne_unit + smalll;
@@ -1358,7 +1358,6 @@ int get_fluid_params_star(double X[NDIM], struct GRMHD *modvar) {
     }
 
     double lfac = sqrt(gVdotgV + 1.);
-    (*modvar).lfac = lfac;
 
     V_u[1] = gV_u[1] / lfac;
     V_u[2] = gV_u[2] / lfac;
@@ -1430,7 +1429,6 @@ int get_fluid_params_star(double X[NDIM], struct GRMHD *modvar) {
         exit(1);
     }
 #endif
-    double gam = neqpar[0];
 
     double beta_trans = 1.0;
 
