@@ -259,9 +259,8 @@ void star_BB_emission(double *lightpath, int steps,
             // Compute the photon frequency in the plasma frame:
             nu_p = freq_in_plasma_frame(modvar.U_u, k_d);
 
-            if (radii >= 4.201){
-                IQUV[f][0] = 0.;
-            }
+            IQUV[f][0] = BB_spectrum(nu_p, Temp)/(nu_p * nu_p * nu_p);
+            
             write_starBB_output(X_u, IQUV, block, pixel, alpha, beta, frequency, phi_global);
 
         }
