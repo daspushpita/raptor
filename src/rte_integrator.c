@@ -180,23 +180,6 @@ double Temperature1(double rho, double pp, double gammarel, double X_u[4], doubl
     }
     stress_BL(X_u, TMA, TMA_BL);
     TMA_rt = fabs(TMA_BL[1][0]) * RHO_unit * SPEED_OF_LIGHT * SPEED_OF_LIGHT * SPEED_OF_LIGHT;
-
-    //#if (DEBUG)
-    //    if (TMArt < 0.) {
-    //       double R2 = radii;
-    //        fprintf(stderr, "TMArt isnan r %e rmin %e\n", R2, CUTOFF_INNER);
-    //        fprintf(stderr, "TMArt isnan X %e %e %e %e\n", X_u[0], X_u[1], X_u[2], X_u[3]);
-    //        fprintf(stderr, "TMArt isnan U_u %e %e %e %e\n", 
-    //            (modvar).U_u[0], (modvar).U_u[1],
-    //            (modvar).U_u[2], (modvar).U_u[3]);
-    //        fprintf(stderr,"rho isnan %e\n", modvar.rho);
-    //        fprintf(stderr,"pressure isnan %e\n", modvar.pp);
-    //        fprintf(stderr,"Lfac isnan %e\n", modvar.lfac);
-    //        fprintf(stderr, "TMArt isnan U_u in BL %e %e %e %e\n", 
-    //            uBL_u[0], uBL_u[1], uBL_u[2], uBL_u[3]);
-    //        exit(1);
-    //    }
-    //#endif
     Temp = pow(TMA_rt/sigmaa, 1./4.);
     return Temp;
 }
