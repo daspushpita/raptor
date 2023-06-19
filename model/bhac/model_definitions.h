@@ -18,6 +18,7 @@
 #define B1 5
 #define B2 6
 #define B3 7
+#define TR1 8
 
 #define D 0
 #define S1 1
@@ -25,10 +26,11 @@
 #define S3 3
 #define TAU 4
 #define DS 8
+#define DTR1 9
 extern int LFAC;
 extern int XI;
 
-#define NP 8
+#define NP 9
 
 #define NSPIN 3
 
@@ -52,6 +54,7 @@ typedef struct GRMHD {
     double prim_rho;
     double prim_pp;
     double gammarel;
+    double tr1;
 } GRMHD;
 
 typedef struct block {

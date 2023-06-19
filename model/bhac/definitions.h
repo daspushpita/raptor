@@ -28,7 +28,7 @@
 #define DEBUG (1)
 
 #define NDIM 4
-#define NPRIM 8
+#define NPRIM 9
 
 #define IMGFILE (1)
 #define SPECFILE (1)

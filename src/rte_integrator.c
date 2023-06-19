@@ -225,9 +225,8 @@ void star_BB_emission(double *lightpath, int steps,
         
         lower_index(X_u, k_u, k_d);
 
-        //Checking tensor transformation
         Temp = Temperature1(modvar.prim_rho, modvar.prim_pp, modvar.gammarel, X_u, modvar.U_u);
-
+        Temp = Temp * modvar.tr1;
         for (int f = 0; f < num_frequencies; f++) {
 
             IQUV[f][0] = 0.; //Initializing everything to 0
@@ -243,8 +242,7 @@ void star_BB_emission(double *lightpath, int steps,
             nu_p = freq_in_plasma_frame(modvar.U_u, k_d);
 
             IQUV[f][0] = BB_spectrum(nu_p, Temp)/(nu_p * nu_p * nu_p);
-            
-            write_starBB_output(X_u, IQUV, block, pixel, alpha, beta, frequency, phi_global);
+            write_starBB_output(X_u, IQUV, Temp, block, pixel, alpha, beta, frequency, phi_global);
 
         }
     }

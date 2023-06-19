@@ -448,7 +448,7 @@ void convert2prim(double prim[8], double **conserved, int c, double X[3],
     prim[B1] = BPOL * conserved[B1][c];
     prim[B2] = BPOL * conserved[B2][c];
     prim[B3] = BPOL * conserved[B3][c];
-
+    prim[TR1] = conserved[DTR1][c] / conserved[D][c];
     // con2prim can fail for internal energy, we have a backup with entropy.
     if (prim[UU] < 0) {
         fprintf(stderr, "UU %e\n", prim[UU]);
@@ -862,7 +862,7 @@ void init_grmhd_data(char *fname) {
                     exit(1);
                 }
 #endif
-                double prim[8];
+                double prim[9];
                 convert2prim(prim, values, c, Xbar[i][c], Xgrid[i][c],
                              block_info[i].dxc_block);
 
@@ -876,6 +876,7 @@ void init_grmhd_data(char *fname) {
                 p[B1][i][c][0] = prim[B1];
                 p[B2][i][c][0] = prim[B2];
                 p[B3][i][c][0] = prim[B3];
+                p[TR1][i][c][0] = prim[TR1];
             }
             if (i == (nleafs / 2) && c == 0)
                 fprintf(stderr, ".");
@@ -1045,7 +1046,7 @@ int get_fluid_params(double X[NDIM], struct GRMHD *modvar) {
     int igrid = (*modvar).igrid_c;
     int i, c;
     double del[NDIM];
-    double rho, uu;
+    double rho, uu, tracer1;
     double Bp[NDIM], V_u[NDIM];
     double gV_u[NDIM], gVdotgV;
 
@@ -1109,12 +1110,13 @@ int get_fluid_params(double X[NDIM], struct GRMHD *modvar) {
 
     rho = interp_scalar(p[KRHO][igrid], c, del);
     uu = interp_scalar(p[UU][igrid], c, del);
-
+    tracer1 = interp_scalar(p[TR1][igrid], c, del);
 
     double gam = neqpar[0];
     (*modvar).prim_pp = uu * (gam - 1.);
     (*modvar).prim_rho = rho;
     (*modvar).gammarel = gam;
+    (*modvar).tr1 = tracer1;
 
     (*modvar).n_e = rho * Ne_unit + smalll;
 
@@ -1255,7 +1257,7 @@ int get_fluid_params_star(double X[NDIM], struct GRMHD *modvar) {
     int igrid = (*modvar).igrid_c;
     int i, c;
     double del[NDIM];
-    double rho, uu;
+    double rho, uu, tracer1;
     double Bp[NDIM], V_u[NDIM];
     double gV_u[NDIM], gVdotgV;
 
@@ -1319,15 +1321,14 @@ int get_fluid_params_star(double X[NDIM], struct GRMHD *modvar) {
 
     rho = interp_scalar(p[KRHO][igrid], c, del);
     uu = interp_scalar(p[UU][igrid], c, del);
+    tracer1 = interp_scalar(p[TR1][igrid], c, del);
 
     double gam = neqpar[0];
 
     (*modvar).prim_pp = uu * (gam - 1.);
     (*modvar).prim_rho = rho;
     (*modvar).gammarel = gam;
-
-
-
+    (*modvar).tr1 = tracer1;
     (*modvar).n_e = rho * Ne_unit + smalll;
 
     Bp[1] = interp_scalar(p[B1][igrid], c, del);
