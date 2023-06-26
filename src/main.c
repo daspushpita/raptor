@@ -126,69 +126,64 @@ int main(int argc, char *argv[]) {
 
     fprintf(stderr, "\nStarting ray tracing\n\n");
 
-    //while (phi_global <= end_phi) { // For all phi...
+    struct Camera *intensityfield;
 
-        struct Camera *intensityfield;
+    init_camera(&intensityfield);
 
-        init_camera(&intensityfield);
-
-        #if (SMR)
-            prerun_refine(&intensityfield);
-        #endif
-                
-        for (int f = 0; f < num_frequencies; f++) { // For all frequencies...
-            for (int s = 0; s < nspec; s++)
-                energy_spectrum[f][s] = 0.;
-        }
-
-        int block = 0;
+    #if (SMR)
+        prerun_refine(&intensityfield);
+    #endif
             
-        while (block  < tot_blocks) { // block_total
-            if (block % (25) == 0)
-                fprintf(stderr, "block %d of total %d\n", block, tot_blocks);
+    for (int f = 0; f < num_frequencies; f++) { // For all frequencies...
+        for (int s = 0; s < nspec; s++)
+            energy_spectrum[f][s] = 0.;
+    }
 
-            calculate_image_block(&intensityfield[block], frequencies, block, phi_global);
-            #if (AMR)
-                if (refine_block(intensityfield[block])) {
-                    add_block(&intensityfield, block);
-                } else {
-                    block++;
-                }
-            #else
+    int block = 0;
+        
+    while (block  < tot_blocks) { // block_total
+        if (block % (25) == 0)
+            fprintf(stderr, "block %d of total %d\n", block, tot_blocks);
+
+        calculate_image_block(&intensityfield[block], frequencies, block, phi_global);
+        #if (AMR)
+            if (refine_block(intensityfield[block])) {
+                add_block(&intensityfield, block);
+            } else {
                 block++;
-            #endif
-        }
-
-        fprintf(stderr, "\nRay tracing done for phi %d!\n\n", NPHI);
-
-        compute_spec(intensityfield, energy_spectrum);
-
-        #if (USERSPEC)
-            compute_spec_user(intensityfield, energy_spectrum);
+            }
+        #else
+            block++;
         #endif
+    }
 
-        fprintf(stderr, "\nFor PPM Energy Spectrum is the Flux\n\n");
+    fprintf(stderr, "\nRay tracing done for phi %d!\n\n", NPHI);
 
-        fprintf(stderr, "Frequency %.5e Hz Integrated flux density = %.5e Jy\n",
-            frequencies[0], JANSKY_FACTOR * energy_spectrum[0][0]);
+    compute_spec(intensityfield, energy_spectrum);
 
-        for (int f = 0; f < num_frequencies; f++) {
-            write_starBB_spectrum(energy_spectrum, frequencies, f, phi_global); 
-        }
+    #if (USERSPEC)
+        compute_spec_user(intensityfield, energy_spectrum);
+    #endif
 
-        output_files(intensityfield, energy_spectrum, frequencies);
+    fprintf(stderr, "\nFor PPM Energy Spectrum is the Flux\n\n");
 
-        #if (UNIF)
-            write_uniform_camera(intensityfield, frequencies[0], 0);
-        #endif
-        free(intensityfield);
+    fprintf(stderr, "Frequency %.5e Hz Integrated flux density = %.5e Jy\n",
+        frequencies[0], JANSKY_FACTOR * energy_spectrum[0][0]);
 
-        //////////////////////////
-        // FREE ALLOCATED POINTERS
-        //////////////////////////
-    //    phi_global += dphi;
-    //    nphi += 1;
-    //}
+    for (int f = 0; f < num_frequencies; f++) {
+        write_starBB_spectrum(energy_spectrum, frequencies, f, phi_global); 
+    }
+
+    output_files(intensityfield, energy_spectrum, frequencies);
+
+    #if (UNIF)
+        write_uniform_camera(intensityfield, frequencies[0], 0);
+    #endif
+    free(intensityfield);
+
+    //////////////////////////
+    // FREE ALLOCATED POINTERS
+    //////////////////////////
     fprintf(stderr, "\nThat's all folks!\n");
         
 #else
