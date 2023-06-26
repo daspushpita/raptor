@@ -69,7 +69,8 @@ def plot_data_stokes(image,min,max,stokes_ind,data_id,fig,ax,halfrange=40,mas=1,
         ax.set_aspect('equal')
 
         if(stokes_ind==0):
-            figure=ax.pcolormesh(alpha,beta,(array/max[stokes_ind])**0.5,vmin=0,vmax=1,cmap=cmap,shading='auto')
+            figure=ax.pcolormesh(alpha,beta,(array/max[stokes_ind]),vmin=0,vmax=1,cmap=cmap,shading='auto')
+            CS = ax.contour(alpha, beta, array, [8.e-1],linecolor='y')
         else:
             figure=ax.pcolormesh(alpha,beta,(array/max[stokes_ind]),vmin=-1,vmax=1,cmap=cmap,shading='auto')
 

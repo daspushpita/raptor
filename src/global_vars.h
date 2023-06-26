@@ -23,6 +23,7 @@ extern int max_level;
 extern char GRMHD_FILE[256];
 
 extern double MBH, M_UNIT, TIME_INIT, INCLINATION;
+extern int NPHI;
 extern double R_HIGH, R_LOW;
 extern double FREQS_PER_DEC, FREQ_MIN, FREQ_MAX;
 

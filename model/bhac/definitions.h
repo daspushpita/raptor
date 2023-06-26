@@ -36,7 +36,7 @@
 #define POL (0)
 #define RAYOUT 0
 #define PPM 1
-
+#define phi_tot 50
 #define num_frequencies 1
 
 #define FREQFILE (0)

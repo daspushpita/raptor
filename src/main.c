@@ -93,11 +93,12 @@ int main(int argc, char *argv[]) {
     ////////////////////
 
 #if (PPM)
-    int nphi = 0;
-    int phi_tot = 50;
+    //int nphi = 0;
     double end_phi = M_PI;
-    double phi_global = -M_PI;
+    double phi_start = -M_PI;
     double dphi = 2. * M_PI/(double)phi_tot;
+    double phi_global = phi_start + NPHI * dphi;
+
 
     fprintf(stderr, "\nNumber of frequencies to compute: %d\n",
     num_frequencies);
@@ -125,7 +126,7 @@ int main(int argc, char *argv[]) {
 
     fprintf(stderr, "\nStarting ray tracing\n\n");
 
-    while (phi_global <= end_phi) { // For all phi...
+    //while (phi_global <= end_phi) { // For all phi...
 
         struct Camera *intensityfield;
 
@@ -158,7 +159,7 @@ int main(int argc, char *argv[]) {
             #endif
         }
 
-        fprintf(stderr, "\nRay tracing done for phi %d!\n\n", nphi);
+        fprintf(stderr, "\nRay tracing done for phi %d!\n\n", NPHI);
 
         compute_spec(intensityfield, energy_spectrum);
 
@@ -175,7 +176,7 @@ int main(int argc, char *argv[]) {
             write_starBB_spectrum(energy_spectrum, frequencies, f, phi_global); 
         }
 
-        output_files(intensityfield, energy_spectrum, frequencies, nphi);
+        output_files(intensityfield, energy_spectrum, frequencies);
 
         #if (UNIF)
             write_uniform_camera(intensityfield, frequencies[0], 0);
@@ -185,9 +186,9 @@ int main(int argc, char *argv[]) {
         //////////////////////////
         // FREE ALLOCATED POINTERS
         //////////////////////////
-        phi_global += dphi;
-        nphi += 1;
-    }
+    //    phi_global += dphi;
+    //    nphi += 1;
+    //}
     fprintf(stderr, "\nThat's all folks!\n");
         
 #else

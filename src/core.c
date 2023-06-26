@@ -18,6 +18,7 @@ char GRMHD_FILE[256];
 
 double MBH, M_UNIT, TIME_INIT, INCLINATION;
 double R_HIGH, R_LOW;
+int NPHI;
 double FREQS_PER_DEC, FREQ_MIN, FREQ_MAX;
 
 double SOURCE_DIST; // Distance to M87 (cm); for Sgr A* use (2.47e22)
@@ -66,6 +67,7 @@ void read_model(char *argv[]) {
     // Second argument: GRMHD file
     sscanf(argv[2], "%s", GRMHD_FILE);
     sscanf(argv[3], "%lf", &TIME_INIT);
+    sscanf(argv[4], "%d", &NPHI);
 
     fprintf(stderr, "\nModel parameters:\n\n");
     fprintf(stderr, "MBH \t\t= %g Msun\n", MBH);
@@ -94,6 +96,7 @@ void read_model(char *argv[]) {
     fprintf(stderr, "FREQS_PER_DEC \t= %lf \n", FREQS_PER_DEC);
     fprintf(stderr, "FREQ_MIN \t= %g Hz\n", FREQ_MIN);
     fprintf(stderr, "STEPSIZE \t= %g \n", STEPSIZE);
+    fprintf(stderr, "nphi \t= %d \n", NPHI);
 
     // to cgs units
     MBH *= MSUN;

@@ -362,7 +362,7 @@ void compute_spec_user(struct Camera *intensity,
 // Create output files (image, spectrum, etc.)
 void output_files(struct Camera *intesityfield,
                   double spectrum[num_frequencies][nspec],
-                  double frequencies[num_frequencies], int nphi);
+                  double frequencies[num_frequencies]);
 
 void write_image_hdf5(char *hdf5_filename, struct Camera *data,
                       double *frequencies, double factor);
@@ -375,7 +375,7 @@ void write_ray_output(double X_u[], double k_u[], int block, int pixel);
 
 //Adding the output for Black Body emission from the star :-D//////////
 void write_starBB_output(double X_u[], double IQUV[num_frequencies][4], 
-                        int block, int pixel, double alpha, double beta,
+                        double Temp, int block, int pixel, double alpha, double beta,
                         double frequencies[num_frequencies],
                         double phi_global);
 

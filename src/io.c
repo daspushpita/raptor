@@ -16,7 +16,7 @@
 
 void output_files(struct Camera *intensityfield,
                   double energy_spectrum[num_frequencies][nspec],
-                  double frequencies[num_frequencies], int nphi) {
+                  double frequencies[num_frequencies]) {
     struct stat st = {0};
     char spec_folder[64] = "output";
 
@@ -27,7 +27,7 @@ void output_files(struct Camera *intensityfield,
 #if (SPECFILE)
     char spec_filename[256] = "";
     sprintf(spec_filename, "%s/spectrum_%d_%.02lf_%d.dat", spec_folder,
-            (int)TIME_INIT, INCLINATION, nphi);
+            (int)TIME_INIT, INCLINATION, NPHI);
     FILE *specfile = fopen(spec_filename, "w");
 #endif
 
@@ -37,7 +37,7 @@ void output_files(struct Camera *intensityfield,
 #if (IMGFILE)
         char hdf5_filename[512] = "";
         sprintf(hdf5_filename, "%s/img_data_%d_%d.h5", spec_folder,
-                (int)TIME_INIT,nphi);
+                (int)TIME_INIT,NPHI);
         write_image_hdf5(hdf5_filename, intensityfield, frequencies,
                          JANSKY_FACTOR);
 #endif
@@ -346,7 +346,7 @@ void write_ray_output(double X_u[4], double k_u[4], int block, int pixel) {
 }
 
 void write_starBB_output(double X_u[4], double IQUV[num_frequencies][4], 
-                        int block, int pixel, double alpha, double beta,
+                        double Temp, int block, int pixel, double alpha, double beta,
                         double frequencies[num_frequencies],double phi_global) {
 
     char fname[20];
@@ -355,21 +355,18 @@ void write_starBB_output(double X_u[4], double IQUV[num_frequencies][4],
     struct stat st = {0};
     double r_current = get_r(X_u);
 
-    int phi_tot = 50;
-    double dphi = 2. * M_PI/(double)phi_tot;
-    int nphi = phi_global/dphi;
 
     if (stat(star_folder, &st) == -1) {
         mkdir(star_folder, 0700);
     }
 
-    sprintf(fname, "%s/data_starBB_%d.csv", star_folder, nphi);
+    sprintf(fname, "%s/data_starBB_%d.csv", star_folder, NPHI);
 
     if (stat(fname, &st) == -1) {
         starBB = fopen(fname, "w");
 
         fprintf(starBB, "x_0 x_1 x_2 x_3 radius ");
-        fprintf(starBB, "Intensity phi alpha beta\n");
+        fprintf(starBB, "Intensity Temp phi alpha beta\n");
 
         fclose(starBB);
     }
@@ -377,7 +374,7 @@ void write_starBB_output(double X_u[4], double IQUV[num_frequencies][4],
     starBB = fopen(fname, "a");
 
     fprintf(starBB, "%e %e %e %e %e ", X_u[0], X_u[1], X_u[2], X_u[3], r_current);
-    fprintf(starBB, "%e %e %e %e\n", IQUV[0][0] * pow(frequencies[0], 3.), phi_global, alpha, beta); // At the moment only works for one frequency
+    fprintf(starBB, "%e %e %e %e %e\n", IQUV[0][0] * pow(frequencies[0], 3.), Temp, phi_global, alpha, beta); // At the moment only works for one frequency
 
     fclose(starBB);
 }
