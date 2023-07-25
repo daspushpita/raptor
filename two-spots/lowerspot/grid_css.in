@@ -1,0 +1,14 @@
+nxlone1 = 128
+nxlone2 = 128
+nxlone3 = 128
+
+xprobminx1 = -400.
+xprobminx2 = -400.
+xprobminx3 = -400.
+
+xprobmax1 = 400.
+xprobmax2 = 400.
+xprobmax3 = 400.
+
+omega = 0.0
+rstar = 4.0
