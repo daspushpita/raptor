@@ -1110,7 +1110,7 @@ int get_fluid_params(double X[NDIM], struct GRMHD *modvar) {
 
     rho = interp_scalar(p[KRHO][igrid], c, del);
     uu = interp_scalar(p[UU][igrid], c, del);
-    tracer1 = interp_scalar(p[TR1][igrid], c, del);
+    tracer1 =p[TR1][igrid][c][0]; //  interp_scalar(p[TR1][igrid], c, del);
 
     double gam = neqpar[0];
     (*modvar).prim_pp = uu * (gam - 1.);
@@ -1321,7 +1321,7 @@ int get_fluid_params_star(double X[NDIM], struct GRMHD *modvar) {
 
     rho = interp_scalar(p[KRHO][igrid], c, del);
     uu = interp_scalar(p[UU][igrid], c, del);
-    tracer1 = interp_scalar(p[TR1][igrid], c, del);
+    tracer1 = p[TR1][igrid][c][0]; //interp_scalar(p[TR1][igrid], c, del);
 
     double gam = neqpar[0];
 

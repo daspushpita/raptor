@@ -34,7 +34,7 @@ def read_data(folder,ind,data_id,nphi):
     min = [-100.,-100.,-100.,-100.]
     max = [100.,100.,100,100.]
     print(len(data_id))
-    for j in range(0,len(data_id)-2):
+    for j in range(0,len(data_id)-4):
         for i in range(0,len(images[data_id[j]])):
             current=np.max(images[data_id[j]][i])
             max[j]=np.maximum(max[j],np.max(images[data_id[j]][i]))
@@ -70,12 +70,13 @@ def plot_data_stokes(image,min,max,stokes_ind,data_id,fig,ax,halfrange=40,mas=1,
 
         if(stokes_ind==0):
             figure=ax.pcolormesh(alpha,beta,(array/max[stokes_ind]),vmin=0,vmax=1,cmap=cmap,shading='auto')
-            CS = ax.contour(alpha, beta, array, [8.e-1],linecolor='y')
+            #CS = ax.contour(alpha, beta, array, [8.e-1],linecolor='y')
         else:
             figure=ax.pcolormesh(alpha,beta,(array/max[stokes_ind]),vmin=-1,vmax=1,cmap=cmap,shading='auto')
 
     fig.colorbar(figure,label=label,ax=ax,fraction=0.046,pad=0.04)
-
+    #ax.set_xlim(-1,1)
+    #ax.set_ylim(-1,1)
     ax.set_xlim(-halfrange*mas,halfrange*mas)
     ax.set_ylim(-halfrange*mas,halfrange*mas)
 
