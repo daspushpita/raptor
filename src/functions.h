@@ -374,7 +374,8 @@ void write_uniform_camera(struct Camera *intensityfield, double frequency,
 void write_ray_output(double X_u[], double k_u[], int block, int pixel);
 
 //Adding the output for Black Body emission from the star :-D//////////
-void write_starBB_output(double X_u[], double IQUV[num_frequencies][4], 
+void write_starBB_output(double X_u[], double IQUV[num_frequencies][4],
+                        double Temp, double tracer,
                         int block, int pixel, double alpha, double beta,
                         double frequencies[num_frequencies],
                         double phi_global);

@@ -242,7 +242,7 @@ void star_BB_emission(double *lightpath, int steps,
             nu_p = freq_in_plasma_frame(modvar.U_u, k_d);
 
             IQUV[f][0] = BB_spectrum(nu_p, Temp)/(nu_p * nu_p * nu_p);
-            write_starBB_output(X_u, IQUV, Temp, block, pixel, alpha, beta, frequency, phi_global);
+            write_starBB_output(X_u, IQUV, block, pixel, alpha, beta, frequency, phi_global);
 
         }
     }

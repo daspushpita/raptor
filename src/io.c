@@ -346,6 +346,7 @@ void write_ray_output(double X_u[4], double k_u[4], int block, int pixel) {
 }
 
 void write_starBB_output(double X_u[4], double IQUV[num_frequencies][4], 
+                        double Temp, double tracer,
                         int block, int pixel, double alpha, double beta,
                         double frequencies[num_frequencies],double phi_global) {
 
@@ -369,7 +370,7 @@ void write_starBB_output(double X_u[4], double IQUV[num_frequencies][4],
         starBB = fopen(fname, "w");
 
         fprintf(starBB, "x_0 x_1 x_2 x_3 radius ");
-        fprintf(starBB, "Intensity phi alpha beta\n");
+        fprintf(starBB, "Intensity Temp tracer phi alpha beta\n");
 
         fclose(starBB);
     }
@@ -377,7 +378,7 @@ void write_starBB_output(double X_u[4], double IQUV[num_frequencies][4],
     starBB = fopen(fname, "a");
 
     fprintf(starBB, "%e %e %e %e %e ", X_u[0], X_u[1], X_u[2], X_u[3], r_current);
-    fprintf(starBB, "%e %e %e %e\n", IQUV[0][0] * pow(frequencies[0], 3.), phi_global, alpha, beta); // At the moment only works for one frequency
+    fprintf(starBB, "%e %e %e %e %e %e\n", IQUV[0][0] * pow(frequencies[0], 3.), Temp, tracer, phi_global, alpha, beta); // At the moment only works for one frequency
 
     fclose(starBB);
 }
