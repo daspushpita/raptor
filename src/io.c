@@ -396,7 +396,7 @@ void write_starBB_spectrum(double energy_spectrum[num_frequencies][nspec],
         mkdir(star_folder, 0700);
     }
 
-    sprintf(fname, "%s/data_starBB_spectrum.csv", star_folder);
+    sprintf(fname, "%s/data_starBB_spectrum_%d.csv", star_folder,freq);
 
     if (stat(fname, &st) == -1) {
         starBBspec = fopen(fname, "w");
